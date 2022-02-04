@@ -9,12 +9,9 @@ import Foundation
 
 class ObservableObject<T> {
     
-    var value: T? {
+    var value: T {
         didSet {
-            guard let value = value else {
-                print("value is missing")
-                return
-            }
+            
             listener?(value)
         }
     }
@@ -27,7 +24,7 @@ class ObservableObject<T> {
     
     
     func bind(listener: @escaping ((T) -> Void)) {
-        listener(value!)
+        listener(value)
         self.listener = listener
     }
 }

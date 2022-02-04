@@ -17,4 +17,12 @@ extension UIColor {
     static var secondaryColor: UIColor {
         return UIColor(named: "SecondaryColor")!
     }
+    
+    static var positiveGreen: UIColor {
+        return UIColor(named: "PositiveGreen")!
+    }
+    
+    static var negativeRed: UIColor {
+        return UIColor(named: "NegativeRed")!
+    }
 }
