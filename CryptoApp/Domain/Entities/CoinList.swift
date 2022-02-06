@@ -15,4 +15,5 @@ struct CoinList {
     let currentPrice: Double
     let priceChangePercentage24H: Double?
     let marketCapRank: Int
+
 }

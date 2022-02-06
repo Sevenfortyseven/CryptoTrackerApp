@@ -25,4 +25,8 @@ extension UIColor {
     static var negativeRed: UIColor {
         return UIColor(named: "NegativeRed")!
     }
+    
+    static var borderColor: UIColor {
+        return UIColor(named: "BorderColor")!
+    }
 }

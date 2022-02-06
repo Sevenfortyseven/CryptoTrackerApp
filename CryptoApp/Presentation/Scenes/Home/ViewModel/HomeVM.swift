@@ -19,8 +19,8 @@ class HomeViewModel {
     }
     
     public var reloadTableView: ObservableObject<Bool?> = ObservableObject(value: false)
+    public var globalData: ObservableObject<GlobalData?> = ObservableObject(value: nil)
     
-//    public var reloadTableView: (() -> Void)
     
     public var numberOfCells: Int {
         return cellVMs.count
@@ -34,14 +34,15 @@ class HomeViewModel {
     public func getCellVM(at indexPath: IndexPath) -> CryptoCellViewModel {
         return cellVMs[indexPath.row]
     }
-
+    
     
     
     // MARK: - Private
     
-  
-
+    
+    
     private func fetchData() {
+        // Fetch Separate Coin data
         NetworkEngine.request(endpoint: CoinGeckoEndpoint.CoinList) { [weak self] (result: Result<CoinListDTOResponse, Error>) in
             switch result {
             case .success(let response):
@@ -53,7 +54,19 @@ class HomeViewModel {
                 print(error)
             }
         }
+        // Fetch Global market Data
+        NetworkEngine.request(endpoint: CoinGeckoEndpoint.Global) { [weak self] (result: Result<GlobalDataDTOResponse, Error>) in
+            switch result {
+            case .success(let response):
+                let mappedData = GlobalData(response.data)
+                self?.globalData.value = mappedData
+                print(response)
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
+    
     /// Transforms coin model into CellVM  model
     private func createCellVM(_ coinList: CoinList) -> CryptoCellViewModel {
         let coinSymbol = coinList.symbol
@@ -62,7 +75,7 @@ class HomeViewModel {
         let currentPrice = coinList.currentPrice
         let priceChange = coinList.priceChangePercentage24H ?? 0
         let marketCapRank = coinList.marketCapRank
-
+        
         return CryptoCellViewModel(name: coinName, symbol: coinSymbol, iconURL: coinImageURL, currentPrice: currentPrice, priceChangePercentage24H: priceChange, marketCapRank: marketCapRank)
     }
     
@@ -74,5 +87,7 @@ class HomeViewModel {
         }
         self.cellVMs = cellViewModels
     }
-      
+    
+    
+    
 }

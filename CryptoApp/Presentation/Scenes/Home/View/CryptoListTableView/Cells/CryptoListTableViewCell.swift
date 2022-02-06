@@ -84,6 +84,7 @@ class CryptoListTableViewCell: UITableViewCell {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
+        stackView.spacing = 1
         stackView.distribution = .fill
         stackView.alignment = .fill
         return stackView
@@ -107,7 +108,7 @@ class CryptoListTableViewCell: UITableViewCell {
     
     private let symbolLabel: UILabel = {
         let label = UILabel()
-//        label.textColor = .secondaryColor
+        label.textColor = .white
         label.textAlignment = .justified
         return label
     }()
@@ -137,18 +138,21 @@ extension CryptoListTableViewCell {
         let stackViewWidthMultiplier = CGFloat(0.3)
         let imageViewSizeMultiplier = CGFloat(0.8)
         let numerationLabelMultiplier = CGFloat(0.15)
+        let topPadding = CGFloat(15)
+        let leftPadding = CGFloat(15)
+        let rightPadding = CGFloat(-15)
         
         var constraints = [NSLayoutConstraint]()
         
         /// Left side StackVIew
-        constraints.append(leftSideStackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor))
-        constraints.append(leftSideStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor))
+        constraints.append(leftSideStackView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: leftPadding))
+        constraints.append(leftSideStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: topPadding))
         constraints.append(leftSideStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor))
         constraints.append(leftSideStackView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: stackViewWidthMultiplier))
         
         /// Right side StackView
-        constraints.append(rightSideStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor))
-        constraints.append(rightSideStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor))
+        constraints.append(rightSideStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: rightPadding))
+        constraints.append(rightSideStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: topPadding))
         constraints.append(rightSideStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor))
         
         /// Coin Icon

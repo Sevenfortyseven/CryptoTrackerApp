@@ -9,7 +9,8 @@ import Foundation
 
 enum CoinGeckoEndpoint: Endpoint {
     
-case CoinList
+    case CoinList
+    case Global
     
     var scheme: String {
         switch self {
@@ -26,22 +27,24 @@ case CoinList
     var path: String {
         switch self {
         case .CoinList: return "/api/v3/coins/markets"
+        case .Global: return "/api/v3/global"
         }
     }
     
-    var parameters: [URLQueryItem] {
-        let vsCurrency = "vs_currency"
-        let descending = "market_cap_desc"
+    var parameters: [URLQueryItem]? {
+        let vsCurrency            = "vs_currency"
+        let descending            = "market_cap_desc"
         let priceChangePercentage = "price_change_percentage"
-        let resultsPerPage = "per_page"
+        let resultsPerPage        = "per_page"
         
         switch self {
         case .CoinList: return [URLQueryItem(name: vsCurrency, value: "usd"),
-                               URLQueryItem(name: "order", value: descending),
-                               URLQueryItem(name: priceChangePercentage, value: "24h"),
-                               URLQueryItem(name: resultsPerPage, value: "200"),
-                               URLQueryItem(name: "page", value: "1")
-                               ]
+                                URLQueryItem(name: "order", value: descending),
+                                URLQueryItem(name: priceChangePercentage, value: "24h"),
+                                URLQueryItem(name: resultsPerPage, value: "200"),
+                                URLQueryItem(name: "page", value: "1")
+        ]
+        default: return nil
         }
     }
     
