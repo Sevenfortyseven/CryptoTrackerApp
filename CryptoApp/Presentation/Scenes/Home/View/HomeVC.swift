@@ -32,6 +32,7 @@ class HomeViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         updateFrames()
+        checkForNegativeOrPositiveValues()
     }
     
     
@@ -70,6 +71,9 @@ class HomeViewController: UIViewController {
         }
         viewModel.globalData.bind { [weak self] listener in
             self?.marketCapValue.text = listener?.totalMarketCap
+            self?.marketCapValueUpdate.text = listener?.marketCapChangePercentage24HUsd
+            self?.volume24HLabelValue.text = listener?.totalVolume
+            self?.btcDominanceValueLabel.text = listener?.marketCapPercentage
         }
     }
     
@@ -83,6 +87,18 @@ class HomeViewController: UIViewController {
         cryptoListTableView.layoutIfNeeded()
         _ = cryptoListTableView.mediumCurve
      
+    }
+    
+    // Check for negative or positive value and rotate image/ change it's color accordingly
+    private func checkForNegativeOrPositiveValues() {
+        
+        if marketCapValueUpdate.text?.getFirstChar() == "-" {
+            marketCapValueImage.tintColor = .negativeRed
+            marketCapValueImage.rotateBy180()
+        } else {
+            marketCapValueImage.tintColor = .positiveGreen
+        }
+        
     }
     
     
@@ -131,14 +147,14 @@ class HomeViewController: UIViewController {
         let label = UILabel()
         label.text = "Market Cap"
         label.textColor = .borderColor
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
         return label
     }()
     
     private let marketCapValue: UILabel = {
         let label = UILabel()
         label.textColor = .white
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .headline)
         return label
     }()
     
@@ -169,7 +185,7 @@ class HomeViewController: UIViewController {
         let stackView = UIStackView()
         stackView.distribution = .fill
         stackView.spacing = 5
-        stackView.alignment = .fill
+        stackView.alignment = .center
         stackView.axis = .vertical
         return stackView
     }()
@@ -178,15 +194,14 @@ class HomeViewController: UIViewController {
         let label = UILabel()
         label.text = "24h Volume"
         label.textColor = .borderColor
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
         return label
     }()
     
     private let volume24HLabelValue: UILabel = {
         let label = UILabel()
-        label.text = "2424"
         label.textColor = .white
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .headline)
         return label
     }()
     
@@ -195,7 +210,7 @@ class HomeViewController: UIViewController {
         stackView.axis = .vertical
         stackView.spacing = 5
         stackView.distribution = .fill
-        stackView.alignment = .fill
+        stackView.alignment = .center
         return stackView
     }()
     
@@ -203,22 +218,21 @@ class HomeViewController: UIViewController {
         let label = UILabel()
         label.text = "BTC Dominance"
         label.textColor = .borderColor
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
         return label
     }()
     
     private let btcDominanceValueLabel: UILabel = {
         let label = UILabel()
-        label.text = "24242"
         label.textColor = .white
-        label.font = .preferredFont(forTextStyle: .subheadline)
+        label.font = .preferredFont(forTextStyle: .headline)
         return label
     }()
     
     private let btcDominanceStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.distribution = .fill
-        stackView.alignment = .fill
+        stackView.alignment = .center
         stackView.spacing = 5
         stackView.axis = .vertical
         return stackView
@@ -251,6 +265,7 @@ class HomeViewController: UIViewController {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setImage(UIImage(named: "refresh"), for: .normal)
+        button.addTarget(self, action: #selector(refreshData), for: .touchUpInside)
         button.titleLabel?.font = .preferredFont(forTextStyle: .subheadline)
         button.tintColor = .secondaryColor
         return button
@@ -260,6 +275,7 @@ class HomeViewController: UIViewController {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.titleLabel?.font = .preferredFont(forTextStyle: .subheadline)
+        button.addTarget(self, action: #selector(reorderDataByRank), for: .touchUpInside)
         button.setTitle("Coin", for: .normal)
         button.tintColor = .white
         return button
@@ -269,6 +285,7 @@ class HomeViewController: UIViewController {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.tintColor = .white
+        button.addTarget(self, action: #selector(reorderDataByPrice), for: .touchUpInside)
         button.setTitle("Price", for: .normal)
         return button
     }()
@@ -302,6 +319,28 @@ extension HomeViewController: UISearchBarDelegate {
     
 }
 
+    //MARK: - Button Actions
+
+extension HomeViewController {
+    
+    /// Updates VM to refresh Data
+    @objc private func refreshData() {
+        NotificationCenter.default.post(name: .refreshData, object: nil)
+        refreshBtn.rotate()
+    }
+    
+    /// Updates VM to re-order Coin data by ascending or descending
+    @objc private func reorderDataByRank() {
+        NotificationCenter.default.post(name: .reorderByRank, object: nil)
+    }
+    
+    /// Updates VM to re-order Coin data by price ascending or descending
+    @objc private func reorderDataByPrice() {
+        NotificationCenter.default.post(name: .reorderByPrice, object: nil)
+    }
+    
+}
+
 
     //MARK: - TableView Configuration, Delegate & Datasource
 
@@ -314,7 +353,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print(viewModel.numberOfCells)
         return viewModel.numberOfCells
         
     }
@@ -377,6 +415,7 @@ extension HomeViewController {
         constraints.append(searchBar.searchTextField.leadingAnchor.constraint(equalTo: cryptoListTableView.leadingAnchor))
         constraints.append(searchBar.bottomAnchor.constraint(equalTo: sortByMarketCapBtn.topAnchor,constant: paddingBetweenObjectsNegative))
         constraints.append(searchBar.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: searchBarWidthMultiplier))
+
         
         // Top navigationStack
         constraints.append(navigationStackView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: topPadding))

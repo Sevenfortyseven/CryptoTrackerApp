@@ -39,4 +39,30 @@ extension Double {
     public func transformToPercentString() -> String {
         return transformToString() + "%"
     }
+    
+    /// Converts a Double to a string with abbreviations
+    public func formattedWithAbbreviations() -> String {
+        let num = abs(Double(self))
+        let sign = (self < 0) ? "-" : ""
+        
+        switch num {
+        case 1_000_000_000_000...:
+            let formatted = num / 1_000_000_000_000
+            let stringFormatted = formatted.transformToString()
+            return "\(sign)\(stringFormatted)Tr"
+        case 1_000_000_000...:
+            let formatted = num / 1_000_000_000
+            let stringFormatted = formatted.transformToString()
+            return"\(sign)\(stringFormatted)Bn"
+        case 1_000_000...:
+            let formatted = num / 1_000_000
+            let stringFormatted = formatted.transformToString()
+            return"\(sign)\(stringFormatted)M"
+        case 1_000...:
+            let formatted = num / 1_000
+            let stringFormatted = formatted.transformToString()
+            return"\(sign)\(stringFormatted)K"
+        default: return "\(sign)\(self)"
+        }
+    }
 }

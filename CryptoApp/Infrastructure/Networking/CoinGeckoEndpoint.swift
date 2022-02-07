@@ -12,6 +12,7 @@ enum CoinGeckoEndpoint: Endpoint {
     case CoinList
     case Global
     
+    
     var scheme: String {
         switch self {
         default: return "https"
@@ -33,16 +34,16 @@ enum CoinGeckoEndpoint: Endpoint {
     
     var parameters: [URLQueryItem]? {
         let vsCurrency            = "vs_currency"
-        let descending            = "market_cap_desc"
         let priceChangePercentage = "price_change_percentage"
         let resultsPerPage        = "per_page"
+        let descending            = "market_cap_desc"
         
         switch self {
         case .CoinList: return [URLQueryItem(name: vsCurrency, value: "usd"),
-                                URLQueryItem(name: "order", value: descending),
-                                URLQueryItem(name: priceChangePercentage, value: "24h"),
-                                URLQueryItem(name: resultsPerPage, value: "200"),
-                                URLQueryItem(name: "page", value: "1")
+                                           URLQueryItem(name: "order", value: descending),
+                                           URLQueryItem(name: priceChangePercentage, value: "24h"),
+                                           URLQueryItem(name: resultsPerPage, value: "250"),
+                                           URLQueryItem(name: "page", value: "1")
         ]
         default: return nil
         }
@@ -54,4 +55,14 @@ enum CoinGeckoEndpoint: Endpoint {
         }
     }
     
+    
+    
 }
+
+enum EndpointCustomParams: String {
+    
+    case descending = "market_cap_desc"
+    case ascending  = "market_cap_asc"
+    
+}
+

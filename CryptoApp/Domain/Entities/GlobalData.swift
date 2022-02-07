@@ -33,14 +33,34 @@ struct GlobalDataDTO: Codable {
 struct GlobalData {
 
     let totalMarketCap: String
+    let marketCapChangePercentage24HUsd: String
+    let totalVolume: String
+    let marketCapPercentage: String
 
     init(_ globalData: GlobalDataDTO) {
-        /// obtain ony usd value
-        if let currency = globalData.totalMarketCap.first(where: { $0.key == "usd" }) {
-            self.totalMarketCap = String(currency.value)
+        /// obtain ony usd value with abbreviations
+        if let currencyInUSD = globalData.totalMarketCap.first(where: { $0.key == "usd" }) {
+            self.totalMarketCap = "$" + currencyInUSD.value.formattedWithAbbreviations()
         } else {
-            self.totalMarketCap = ""
+            self.totalMarketCap = "$" + ""
         }
+        
+        /// obtain data for USD value
+        if let totalVolumeinUSD = globalData.totalVolume.first(where: { $0.key == "usd" }) {
+            self.totalVolume = "$" + totalVolumeinUSD.value.formattedWithAbbreviations()
+        } else {
+            self.totalVolume = "$" + ""
+        }
+        
+        /// check for market dominance in BTC
+        if let marketDominanceInBTC = globalData.marketCapPercentage.first(where: { $0.key == "btc" }) {
+            self.marketCapPercentage = marketDominanceInBTC.value.transformToPercentString()
+        } else {
+            self.marketCapPercentage = ""
+        }
+            
+        /// transform into percentage string
+        self.marketCapChangePercentage24HUsd = globalData.marketCapChangePercentage24HUsd.transformToPercentString()
         
     }
     
