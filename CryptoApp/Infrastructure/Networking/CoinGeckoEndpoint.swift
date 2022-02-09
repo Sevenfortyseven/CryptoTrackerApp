@@ -11,6 +11,7 @@ enum CoinGeckoEndpoint: Endpoint {
     
     case CoinList
     case Global
+    case coinData(id: String)
     
     
     var scheme: String {
@@ -29,6 +30,7 @@ enum CoinGeckoEndpoint: Endpoint {
         switch self {
         case .CoinList: return "/api/v3/coins/markets"
         case .Global: return "/api/v3/global"
+        case .coinData(let coinID): return "/api/v3/coins/\(coinID)"
         }
     }
     
@@ -37,14 +39,29 @@ enum CoinGeckoEndpoint: Endpoint {
         let priceChangePercentage = "price_change_percentage"
         let resultsPerPage        = "per_page"
         let descending            = "market_cap_desc"
+        let localization          = "localization"
+        let falseAsString         = "false"
+        let trueAsString          = "true"
+        let tickers               = "tickers"
+        let marketData            = "market_data"
+        let communityData         = "community_data"
+        let developerData         = "developer_data"
+        let sparkline             = "sparkline"
         
         switch self {
         case .CoinList: return [URLQueryItem(name: vsCurrency, value: "usd"),
-                                           URLQueryItem(name: "order", value: descending),
-                                           URLQueryItem(name: priceChangePercentage, value: "24h"),
-                                           URLQueryItem(name: resultsPerPage, value: "250"),
-                                           URLQueryItem(name: "page", value: "1")
-        ]
+                                URLQueryItem(name: "order", value: descending),
+                                URLQueryItem(name: priceChangePercentage, value: "24h"),
+                                URLQueryItem(name: resultsPerPage, value: "250"),
+                                URLQueryItem(name: "page", value: "1")
+                                ]
+        case .coinData: return [URLQueryItem(name: localization, value: falseAsString),
+                                URLQueryItem(name: tickers, value: falseAsString),
+                                URLQueryItem(name: marketData, value: trueAsString),
+                                URLQueryItem(name: communityData, value: falseAsString),
+                                URLQueryItem(name: developerData, value: falseAsString),
+                                URLQueryItem(name: sparkline, value: trueAsString)
+                                ]
         default: return nil
         }
     }

@@ -17,7 +17,7 @@ class CryptoListTableViewCell: UITableViewCell {
                 return
             }
             marketCapRankLabel.text         = cellViewModel.marketCapRank
-            currentPriceLabel.text          = cellViewModel.currentPrice
+            currentPriceLabel.text          = cellViewModel.currentPriceAsString
             priceChangePercenrageLabel.text = cellViewModel.priceChangePercentage24H
             symbolLabel.text                = cellViewModel.symbol
             cryptoIconView.loadImage(urlString: cellViewModel.iconURL)
@@ -63,7 +63,8 @@ class CryptoListTableViewCell: UITableViewCell {
     // MARK: - UI Configuration
     private func updateUI() {
         self.clipsToBounds = true
-        self.backgroundColor = .primaryColor
+        self.backgroundColor = .clear
+
     }
     
     
@@ -93,7 +94,7 @@ class CryptoListTableViewCell: UITableViewCell {
     private let marketCapRankLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.textColor = .secondaryColor
+        label.textColor = .letterColor
         label.adjustsFontSizeToFitWidth = true
         return label
     }()
@@ -116,7 +117,7 @@ class CryptoListTableViewCell: UITableViewCell {
     private let currentPriceLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .right
-        label.textColor = .secondaryColor
+        label.textColor = .letterColor
         return label
     }()
     
@@ -135,7 +136,7 @@ class CryptoListTableViewCell: UITableViewCell {
 extension CryptoListTableViewCell {
     
     private func initializeConstraints() {
-        let stackViewWidthMultiplier = CGFloat(0.3)
+        let stackViewWidthMultiplier = CGFloat(0.45)
         let imageViewSizeMultiplier = CGFloat(0.8)
         let numerationLabelMultiplier = CGFloat(0.15)
         let topPadding = CGFloat(15)

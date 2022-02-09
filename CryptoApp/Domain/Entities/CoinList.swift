@@ -12,6 +12,7 @@ typealias CoinListDTOResponse = [CoinListDTO]
 struct CoinListDTO: Codable {
     
     let symbol, name: String
+    let id: String
     let image: String
     let currentPrice: Double
     let marketCap, marketCapRank: Int
@@ -35,6 +36,7 @@ struct CoinListDTO: Codable {
         case marketCapChangePercentage24H = "market_cap_change_percentage_24h"
         case totalSupply = "total_supply"
         case maxSupply = "max_supply"
+        case id
     }
 }
 
@@ -47,6 +49,7 @@ struct CoinList {
     let currentPrice: Double
     let priceChangePercentage24H: Double?
     let marketCapRank: Int
+    let id: String
 
 }
 

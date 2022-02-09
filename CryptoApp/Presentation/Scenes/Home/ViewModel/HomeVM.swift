@@ -14,12 +14,45 @@ class HomeViewModel {
     
     public var cellVMs = [CryptoCellViewModel]() {
         didSet {
-            reloadTableView.value = true
+            tableViewNeedsReload.value = !tableViewNeedsReload.value!
         }
     }
     
-    public var reloadTableView: ObservableObject<Bool?> = ObservableObject(value: false)
+    public func initDetailsVM(for indexPath: IndexPath) -> DetailsViewModel? {
+        guard let coinData = coinData else { return nil }
+        return DetailsViewModel(coinID: coinData[indexPath.row].id)
+    }
+    
+    // Filter cellVM-s according to the  text input
+    public var searchText: String = "" {
+        didSet {
+            guard !searchText.isEmpty else {
+                self.cellVMs = unfilteredCellVMs
+                return
+            }
+            let textLowercased = searchText.lowercased()
+            let filteredCellVms = unfilteredCellVMs.filter { coin in
+                return coin.name.lowercased().contains(textLowercased) ||
+                coin.symbol.lowercased().contains(textLowercased)
+                
+            }
+            self.cellVMs = filteredCellVms
+            
+        }
+    }
+    //
+    public var isTableViewLoading: Bool = false {
+        didSet {
+            tableViewIsReloading.value = !tableViewIsReloading.value!
+        }
+    }
+    
+    
+    public var tableViewNeedsReload: ObservableObject<Bool?> = ObservableObject(value: false)
+    public var tableViewIsReloading: ObservableObject<Bool?> = ObservableObject(value: false)
     public var globalData: ObservableObject<GlobalData?> = ObservableObject(value: nil)
+    public var isAscendingByPrice: Bool = false
+    public var isAscendingByRank: Bool = false
     
     public var numberOfCells: Int {
         return cellVMs.count
@@ -48,7 +81,8 @@ class HomeViewModel {
     
     // MARK: - Private
     
- 
+    private var unfilteredCellVMs = [CryptoCellViewModel]()
+    private var coinData: [CoinList]?
     
     //Observers
     private var refreshDataObserver: NSObjectProtocol?
@@ -56,29 +90,32 @@ class HomeViewModel {
     private var reorderDataByPrice: NSObjectProtocol?
     
     
-
-    private var isAscendingByRank: Bool = true
-    private var isAscendingByPrice: Bool = false
     
     
     ///Observe if data refresh or reorder  is needed
     private func observe() {
         NotificationCenter.default.addObserver(forName: .refreshData, object: nil, queue: .main) { [weak self] _ in
             self?.fetchData()
+            self?.isAscendingByPrice = false
+            self?.isAscendingByRank = false
         }
         
         NotificationCenter.default.addObserver(forName: .reorderByRank, object: nil, queue: .main) { [weak self] _ in
             if self?.isAscendingByRank == true {
                 self?.sortData(.RankDescending)
+                self?.isAscendingByRank = false
             } else {
                 self?.sortData(.RankAscending)
+                self?.isAscendingByRank = true
             }
         }
         NotificationCenter.default.addObserver(forName: .reorderByPrice, object: nil, queue: .main) { [weak self] _ in
             if self?.isAscendingByPrice == false {
                 self?.sortData(.PriceAscending)
+                self?.isAscendingByPrice = true
             } else {
                 self?.sortData(.PriceDescending)
+                self?.isAscendingByPrice = false
             }
         }
         
@@ -87,12 +124,15 @@ class HomeViewModel {
     
     private func fetchData(_ sortBy: String = EndpointCustomParams.descending.rawValue) {
         // Fetch Separate Coin data
+        isTableViewLoading = true
         NetworkEngine.request(endpoint: CoinGeckoEndpoint.CoinList) { [weak self] (result: Result<CoinListDTOResponse, Error>) in
+            self?.isTableViewLoading = false
             switch result {
             case .success(let response):
                 let mappedData = response.map {
-                    return CoinList(name: $0.name, symbol: $0.symbol, imageURL: $0.image, currentPrice: $0.currentPrice, priceChangePercentage24H: $0.priceChangePercentage24H, marketCapRank: $0.marketCapRank)
+                    return CoinList(name: $0.name, symbol: $0.symbol, imageURL: $0.image, currentPrice: $0.currentPrice, priceChangePercentage24H: $0.priceChangePercentage24H, marketCapRank: $0.marketCapRank, id: $0.id)
                 }
+                self?.coinData = mappedData
                 self?.processFetchedData(mappedData)
             case .failure(let error):
                 print(error)
@@ -128,6 +168,7 @@ class HomeViewModel {
         for coin in coinList {
             cellViewModels.append(createCellVM(coin))
         }
+        self.unfilteredCellVMs = cellViewModels
         self.cellVMs = cellViewModels
     }
     
@@ -137,25 +178,19 @@ class HomeViewModel {
         case .RankAscending:
             let sortedByRankAscending =  self.cellVMs.sorted(by: { Int($0.marketCapRank)! < Int($1.marketCapRank)! })
             self.cellVMs = sortedByRankAscending
-            for data in sortedByRankAscending {
-                print(data.marketCapRank)
-            }
             isAscendingByRank = true
         case .RankDescending:
             let sortedByRankDescending = self.cellVMs.sorted(by: { Int($0.marketCapRank)! > Int($1.marketCapRank)! })
             self.cellVMs = sortedByRankDescending
             isAscendingByRank = false
         case .PriceAscending:
-            let trimmedData: [CryptoCellViewModel]
-            
-           // TODO: Find a way to remove $ from cellVMs.currentPrice strings
-            
-
+            let sortedByPriceAscending = self.cellVMs.sorted(by: {$0.currentPrice < $1.currentPrice })
+            self.cellVMs = sortedByPriceAscending
             isAscendingByPrice = true
         case .PriceDescending:
-            print("kle")
-            let sortedByPriceDescending = self.cellVMs.sorted(by: { Float($0.currentPrice)! < Float($1.currentPrice)! })
+            let sortedByPriceDescending = self.cellVMs.sorted(by: {$0.currentPrice > $1.currentPrice })
             self.cellVMs = sortedByPriceDescending
+            isAscendingByPrice = false
         }
         
     }

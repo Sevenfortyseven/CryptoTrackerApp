@@ -29,4 +29,8 @@ extension UIColor {
     static var borderColor: UIColor {
         return UIColor(named: "BorderColor")!
     }
+    
+    static var letterColor: UIColor {
+        return UIColor(named: "LetterColor")!
+    }
 }
