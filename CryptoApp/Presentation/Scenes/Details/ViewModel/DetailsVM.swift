@@ -10,10 +10,18 @@ import Foundation
 
 class DetailsViewModel {
     
-    var marketData: ObservableObject<LineChartData?> = ObservableObject(value: nil)
-    
-    
     // MARK: - Public
+    
+    
+    public var chartData: ObservableObject<LineChartData?> = ObservableObject(value: nil)
+    public var coinData: ObservableObject<CoinData?> = ObservableObject(value: nil)
+    public var dataLoading: ObservableObject<Bool?> = ObservableObject(value: false)
+    
+    public var isFetchingInProgress: Bool = false {
+        didSet {
+            dataLoading.value = !dataLoading.value!
+        }
+    }
     
     init(coinID: String) {
         self.coinID = coinID
@@ -30,12 +38,14 @@ class DetailsViewModel {
     
     
     private func fetchData() {
-        
+        self.isFetchingInProgress = true
         NetworkEngine.request(endpoint: CoinGeckoEndpoint.coinData(id: coinID)) { [weak self] (result: Result<CoinDataDTOResponse, Error>) in
+            self?.isFetchingInProgress = false
             switch result {
             case .success(let response):
                 let mappedData = CoinData(response)
                 self?.transformIntoChartData(prices: mappedData.sparkLine7D)
+                self?.coinData.value = mappedData
             case .failure(let error):
                 print(error)
             }
@@ -57,19 +67,10 @@ class DetailsViewModel {
             }
         }
         let set = LineChartDataSet(entries: entries, label: "Weekly Timeline")
-        set.drawCirclesEnabled = false
-        set.mode = .cubicBezier
-        set.lineWidth = 3
-        set.fill = Fill(color: .borderColor)
-        set.fillAlpha = 1
-        set.drawFilledEnabled = false
-        set.drawHorizontalHighlightIndicatorEnabled = false
-//        set.highlightColor = .systemRed
-        set.colors = ChartColorTemplates.liberty()
-        set.highlightEnabled = true
+        _ = set.customSetOptions
         let data = LineChartData(dataSet: set)
         data.setDrawValues(false)
-        self.marketData.value = data
+        self.chartData.value = data
     }
     
 }

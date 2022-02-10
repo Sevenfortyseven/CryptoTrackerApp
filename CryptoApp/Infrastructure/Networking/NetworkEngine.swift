@@ -34,7 +34,7 @@ class NetworkEngine {
             }
             guard let data = data, response != nil else { return }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            DispatchQueue.main.async {
                 let decoder = JSONDecoder()
                 if let responseObject = try? decoder.decode(T.self, from: data) {
                     completion(.success(responseObject))

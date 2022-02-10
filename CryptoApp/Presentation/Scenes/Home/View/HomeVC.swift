@@ -119,6 +119,7 @@ class HomeViewController: UIViewController {
     
     private func updateUI() {
         self.view.backgroundColor = .primaryColor
+        navigationController?.navigationBar.barTintColor = .primaryColor
         UIView.animate(withDuration: 1) {
             self.sortingImageForPriceBtn.isHidden = true
             self.sortingImageForRankBtn.isHidden = true

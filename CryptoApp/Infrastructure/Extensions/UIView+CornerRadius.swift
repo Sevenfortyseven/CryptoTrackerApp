@@ -17,5 +17,10 @@ extension UIView {
         return nil
     }
     
- 
+    /// Returns self corner with small curve
+    public var smallCurve: CGFloat? {
+        self.layer.cornerRadius = self.frame.width / 30
+        return nil
+    }
+    
 }

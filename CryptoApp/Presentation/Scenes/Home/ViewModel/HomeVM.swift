@@ -18,6 +18,7 @@ class HomeViewModel {
         }
     }
     
+    
     public func initDetailsVM(for indexPath: IndexPath) -> DetailsViewModel? {
         guard let coinData = coinData else { return nil }
         return DetailsViewModel(coinID: coinData[indexPath.row].id)
