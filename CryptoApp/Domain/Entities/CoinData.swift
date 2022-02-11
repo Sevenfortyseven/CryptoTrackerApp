@@ -21,6 +21,7 @@ struct CoinDataDTO: Codable {
     let marketData: MarketData
     let blockTimeInMinutes: Int?
     let hashingAlgorithm: String?
+    let links: Links
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -31,6 +32,20 @@ struct CoinDataDTO: Codable {
         case marketData = "market_data"
         case blockTimeInMinutes = "block_time_in_minutes"
         case hashingAlgorithm = "hashing_algorithm"
+        case links
+    }
+}
+
+struct Links: Codable {
+    
+    let homepage: [String]?
+    let subredditURL: String?
+    let blockchainSite: [String]?
+    
+    enum CodingKeys: String, CodingKey {
+        case homepage
+        case subredditURL = "subreddit_url"
+        case blockchainSite = "blockchain_site"
     }
 }
 
@@ -58,7 +73,7 @@ struct MarketData: Codable {
     let low24H: [String: Double]
     let priceChange24H: Double
     let marketCapChange24H: Double
-    
+
     enum CodingKeys: String, CodingKey {
         case currentPrice = "current_price"
         case marketCap = "market_cap"
@@ -100,7 +115,10 @@ struct CoinData {
     let marketCapChange24H: String
     let blockTimeInMinutes: String
     let hashingAlgorithm: String
-    
+    let homepageLink: String
+    let redditLink: String
+    let blockchainLink: String
+
     init(_ coinData: CoinDataDTO) {
         
         // Obtain only usd value
@@ -129,6 +147,11 @@ struct CoinData {
         } else {
             self.lowestPriceIn24H = ""
         }
+        if let blockTimeInMinutes = coinData.blockTimeInMinutes {
+            self.blockTimeInMinutes = String(blockTimeInMinutes) + " Min"
+        } else {
+            self.blockTimeInMinutes = "No Data"
+        }
         
         self.sparkLine7D = coinData.marketData.sparkline7D.price
         self.coinName = coinData.name
@@ -142,12 +165,10 @@ struct CoinData {
         self.priceChangePercentage24H = coinData.marketData.priceChangePercentage24H.transformToPercentString()
         self.marketCapChange24H = coinData.marketData.marketCapChange24H.formattedWithAbbreviations()
         
-        if let blockTimeInMinutes = coinData.blockTimeInMinutes {
-            self.blockTimeInMinutes = String(blockTimeInMinutes) + " Min"
-        } else {
-            self.blockTimeInMinutes = "No Data"
-        }
-        
+     
         self.hashingAlgorithm = coinData.hashingAlgorithm ?? "No Data"
+        self.homepageLink = coinData.links.homepage?[0] ?? "No url"
+        self.redditLink = coinData.links.subredditURL ?? "No url"
+        self.blockchainLink = coinData.links.blockchainSite?[0] ?? "No url"
     }
 }

@@ -131,7 +131,7 @@ class HomeViewModel {
             switch result {
             case .success(let response):
                 let mappedData = response.map {
-                    return CoinList(name: $0.name, symbol: $0.symbol, imageURL: $0.image, currentPrice: $0.currentPrice, priceChangePercentage24H: $0.priceChangePercentage24H, marketCapRank: $0.marketCapRank, id: $0.id)
+                    return CoinList(name: $0.name, symbol: $0.symbol, imageURL: $0.image, currentPrice: $0.currentPrice, priceChangePercentage24H: $0.priceChangePercentage24H, marketCapRank: $0.marketCapRank ?? 999, id: $0.id)
                 }
                 self?.coinData = mappedData
                 self?.processFetchedData(mappedData)

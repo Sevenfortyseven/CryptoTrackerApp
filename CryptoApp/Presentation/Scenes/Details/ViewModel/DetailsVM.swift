@@ -16,6 +16,9 @@ class DetailsViewModel {
     public var chartData: ObservableObject<LineChartData?> = ObservableObject(value: nil)
     public var coinData: ObservableObject<CoinData?> = ObservableObject(value: nil)
     public var dataLoading: ObservableObject<Bool?> = ObservableObject(value: false)
+    public var redditLink: ObservableObject<URL?> = ObservableObject(value: nil)
+    public var homepageLink: ObservableObject<URL?> = ObservableObject(value: nil)
+    public var blockchainLink: ObservableObject<URL?> = ObservableObject(value: nil)
     
     public var isFetchingInProgress: Bool = false {
         didSet {
@@ -46,6 +49,9 @@ class DetailsViewModel {
                 let mappedData = CoinData(response)
                 self?.transformIntoChartData(prices: mappedData.sparkLine7D)
                 self?.coinData.value = mappedData
+                self?.homepageLink.value = self?.transformIntoURL(urlString: mappedData.homepageLink)
+                self?.redditLink.value = self?.transformIntoURL(urlString: mappedData.redditLink)
+                self?.blockchainLink.value = self?.transformIntoURL(urlString: mappedData.blockchainLink)
             case .failure(let error):
                 print(error)
             }
@@ -53,7 +59,13 @@ class DetailsViewModel {
         
     }
     
-    
+    ///Transforms optional string into an URL
+    private func transformIntoURL(urlString: String) -> URL? {
+        guard urlString != "No url" else {
+            return nil
+        }
+        return URL(string: urlString)
+    }
     
     
     

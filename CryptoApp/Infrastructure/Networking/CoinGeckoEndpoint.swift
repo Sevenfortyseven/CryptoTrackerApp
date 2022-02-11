@@ -58,7 +58,7 @@ enum CoinGeckoEndpoint: Endpoint {
         case .coinData: return [URLQueryItem(name: localization, value: falseAsString),
                                 URLQueryItem(name: tickers, value: falseAsString),
                                 URLQueryItem(name: marketData, value: trueAsString),
-                                URLQueryItem(name: communityData, value: falseAsString),
+                                URLQueryItem(name: communityData, value: trueAsString),
                                 URLQueryItem(name: developerData, value: falseAsString),
                                 URLQueryItem(name: sparkline, value: trueAsString)
                                 ]

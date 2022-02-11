@@ -15,6 +15,11 @@ class DetailsViewController: UIViewController {
     
     let detailsVM: DetailsViewModel
     
+    var homepageLink: URL?
+    var redditPageLink: URL?
+    var blockchainLink: URL?
+    
+    
     /// Bool value for readMore button
     var isMorePressed: Bool = false
     
@@ -66,6 +71,9 @@ class DetailsViewController: UIViewController {
         self.contentView.addSubview(coinDescriptionStack)
         self.contentView.addSubview(coinInfoStack)
         self.contentView.addSubview(additionalDetailsStack)
+        self.contentView.addSubview(externalLinksLabel)
+        self.contentView.addSubview(homepageLinkButton)
+        self.contentView.addSubview(externalLinksStack)
         self.contentView.addSubview(LoadingViewContainer)
         self.LoadingViewContainer.addSubview(loadingSpinner)
         
@@ -120,19 +128,24 @@ class DetailsViewController: UIViewController {
         priceChange24HValueUpdateStack.addArrangedSubview(priceChange24HValueUpdate)
         marketCapChange24HValueUpdateStack.addArrangedSubview(marketCapChange24HValueUpdateImage)
         marketCapChange24HValueUpdateStack.addArrangedSubview(marketCapChange24HValueUpdate)
+        externalLinksStack.addArrangedSubview(homepageLinkButton)
+        externalLinksStack.addArrangedSubview(redditLinkButton)
+        externalLinksStack.addArrangedSubview(blockChainLinkButton)
         
     }
     
     
     private func startListening() {
         detailsVM.chartData.bind { [weak self] pricesListener in
-            DispatchQueue.main.async {
-                self?.cryptoChart.data = pricesListener
-            }
+            
+            self?.cryptoChart.data = pricesListener
+            
         }
+        
         detailsVM.dataLoading.bind { [weak self] _ in
             self?.waitForLoad()
         }
+        
         detailsVM.coinData.bind { [weak self] data in
             /// Get an image from url
             guard let url = data?.imageURL else { return }
@@ -143,8 +156,8 @@ class DetailsViewController: UIViewController {
                 self?.coinDescriptionTextView.text = "No info available"
                 return
             }
+            
             self?.coinDescriptionTextView.text = data?.overview
-      
             self?.currentPriceValue.text = data?.currentPrice
             self?.currentPriceValueUpdate.text = data?.priceChangePercentage60D
             self?.rankValue.text = data?.marketCapRank
@@ -159,7 +172,17 @@ class DetailsViewController: UIViewController {
             self?.marketCapChange24HValueUpdate.text = data?.marketCapChangePercentage24H
             self?.blockTimeValue.text = data?.blockTimeInMinutes
             self?.hashingAlgorithmValue.text = data?.hashingAlgorithm
-        }      
+
+        }
+        detailsVM.homepageLink.bind { [weak self] url in
+            self?.homepageLink = url
+        }
+        detailsVM.redditLink.bind { [weak self] url in
+            self?.redditPageLink = url
+        }
+        detailsVM.blockchainLink.bind { [weak self] url in
+            self?.blockchainLink = url
+        }
         
     }
     
@@ -287,6 +310,7 @@ class DetailsViewController: UIViewController {
         textView.textColor = .letterColor
         textView.isEditable = false
         textView.isScrollEnabled = false
+        textView.isSelectable = false
         textView.textContainer.maximumNumberOfLines = 3
         textView.font = .preferredFont(forTextStyle: .body, compatibleWith: .init(legibilityWeight: .unspecified))
         return textView
@@ -297,7 +321,7 @@ class DetailsViewController: UIViewController {
         button.setTitle("Read more", for: .normal)
         button.tintColor = .borderColor
         button.alpha = 0.5
-        button.addTarget(self, action: #selector(expandCoinDetailsTextView), for: .touchUpInside)
+        button.addTarget(self, action: #selector(expandCoinDetailsTextView), for: .touchDown)
         button.titleLabel?.font = .preferredFont(forTextStyle: .footnote, compatibleWith: .init(legibilityWeight: .bold))
         return button
     }()
@@ -711,7 +735,7 @@ class DetailsViewController: UIViewController {
     
     private let hashingAlgorithmLabel: UILabel = {
         let label = UILabel()
-        label.text = "Hashing Algorithm"
+        label.text = "Hashing Alg"
         label.textColor = .borderColor
         label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
         return label
@@ -720,8 +744,51 @@ class DetailsViewController: UIViewController {
     private let hashingAlgorithmValue: UILabel = {
         let label = UILabel()
         label.textColor = .white
+        label.numberOfLines = 0
         label.font = .preferredFont(forTextStyle: .headline)
         return label
+    }()
+    
+    private let externalLinksLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.text = "External Links"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = .preferredFont(forTextStyle: .title1, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let externalLinksStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.distribution = .fillEqually
+        stack.alignment = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private let homepageLinkButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Homepage", for: .normal)
+        button.addTarget(self, action: #selector(openHomepage), for: .touchUpInside)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .body, compatibleWith: .init(legibilityWeight: .bold))
+        return button
+    }()
+    
+    private let redditLinkButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.addTarget(self, action: #selector(openRedditPage), for: .touchUpInside)
+        button.setTitle("Reddit", for: .normal)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .body, compatibleWith: .init(legibilityWeight: .bold))
+        return button
+    }()
+    
+    private let blockChainLinkButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Blockchain", for: .normal)
+        button.addTarget(self, action: #selector(openBlockchainPage), for: .touchUpInside)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .body, compatibleWith: .init(legibilityWeight: .bold))
+        return button
     }()
 }
 
@@ -730,9 +797,10 @@ class DetailsViewController: UIViewController {
 extension DetailsViewController {
     
     @objc private func expandCoinDetailsTextView() {
+        
         /// Get the number of lines for textView
         let numLines = Int(coinDescriptionTextView.contentSize.height / coinDescriptionTextView.font!.lineHeight)
-        if !isMorePressed, numLines > 3 {
+        if !isMorePressed, numLines > 2 {
             coinDescriptionTextView.textContainer.maximumNumberOfLines = 0
             coinDescriptionTextView.invalidateIntrinsicContentSize()
             readMoreBtn.setTitle("Less", for: .normal)
@@ -745,8 +813,27 @@ extension DetailsViewController {
         }
     }
     
-    
-    
+    @objc private func openHomepage() {
+        guard let url = homepageLink  else {
+            print("URL not available")
+            return
+        }
+        UIApplication.shared.open(url)
+    }
+    @objc private func openRedditPage() {
+        guard let url = redditPageLink else{
+            print("URL not available")
+            return
+        }
+        UIApplication.shared.open(url)
+    }
+    @objc private func openBlockchainPage() {
+        guard let url = blockchainLink else {
+            print("URL not available")
+            return
+        }
+        UIApplication.shared.open(url)
+    }
 }
 
 
@@ -807,7 +894,8 @@ extension DetailsViewController {
  
         /// Coin Data Stack
         constraints.append(coinInfoStack.topAnchor.constraint(equalTo: coinDescriptionStack.bottomAnchor, constant: paddingBetweenObjects))
-        constraints.append(coinInfoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+//        constraints.append(coinInfoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        constraints.append(coinInfoStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
         
         
         /// Additional Details Label
@@ -815,12 +903,22 @@ extension DetailsViewController {
         constraints.append(additionalDetailsLabel.topAnchor.constraint(equalTo: coinInfoStack.bottomAnchor, constant: paddingBetweenObjects))
         
         /// Additional Details stack
-//        constraints.append(additionalDetailsStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
-        constraints.append(additionalDetailsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+//        constraints.append(additionalDetailsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
         constraints.append(additionalDetailsStack.topAnchor.constraint(equalTo: additionalDetailsLabel.bottomAnchor, constant: paddingBetweenObjects))
-        constraints.append(additionalDetailsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200))
-        constraints.append(additionalDetailsChildRight.leadingAnchor.constraint(equalTo: marketCapAndVolumeStack.leadingAnchor, constant: 0))
+        constraints.append(additionalDetailsChildLeft.leadingAnchor.constraint(equalTo: currentPriceAndRankStack.leadingAnchor))
+//        constraints.append(additionalDetailsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200))
+        constraints.append(additionalDetailsChildRight.leadingAnchor.constraint(equalTo: marketCapAndVolumeStack.leadingAnchor))
+//        constraints.append(additionalDetailsStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
         
+        /// External links label
+        constraints.append(externalLinksLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        constraints.append(externalLinksLabel.topAnchor.constraint(equalTo: additionalDetailsStack.bottomAnchor, constant: paddingBetweenObjects))
+  
+        
+        /// Homepage link button
+        constraints.append(externalLinksStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        constraints.append(externalLinksStack.topAnchor.constraint(equalTo: externalLinksLabel.bottomAnchor, constant: paddingBetweenObjects))
+        constraints.append(externalLinksLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -150))
         
         NSLayoutConstraint.activate(constraints)
         
