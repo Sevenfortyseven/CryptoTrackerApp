@@ -173,23 +173,31 @@ class HomeViewModel {
         self.cellVMs = cellViewModels
     }
     
-    /// Sorts model data by given  option from SortData enum
+    /// Sorts both  model data  and cell viewModel data by given  option from SortData enum
     private func sortData(_ sortBy: SortData) {
         switch sortBy {
         case .RankAscending:
             let sortedByRankAscending =  self.cellVMs.sorted(by: { Int($0.marketCapRank)! < Int($1.marketCapRank)! })
+            let coinDataSorted = self.coinData?.sorted(by: { $0.marketCapRank < $1.marketCapRank })
+            coinData = coinDataSorted
             self.cellVMs = sortedByRankAscending
             isAscendingByRank = true
         case .RankDescending:
             let sortedByRankDescending = self.cellVMs.sorted(by: { Int($0.marketCapRank)! > Int($1.marketCapRank)! })
             self.cellVMs = sortedByRankDescending
+            let coinDataSorted = self.coinData?.sorted(by: { $0.marketCapRank > $1.marketCapRank })
+            coinData = coinDataSorted
             isAscendingByRank = false
         case .PriceAscending:
             let sortedByPriceAscending = self.cellVMs.sorted(by: {$0.currentPrice < $1.currentPrice })
+            let coinDataSorted = self.coinData?.sorted(by: { $0.currentPrice < $1.currentPrice })
+            coinData = coinDataSorted
             self.cellVMs = sortedByPriceAscending
             isAscendingByPrice = true
         case .PriceDescending:
             let sortedByPriceDescending = self.cellVMs.sorted(by: {$0.currentPrice > $1.currentPrice })
+            let coinDataSorted = self.coinData?.sorted(by: { $0.currentPrice > $1.currentPrice })
+            coinData = coinDataSorted
             self.cellVMs = sortedByPriceDescending
             isAscendingByPrice = false
         }

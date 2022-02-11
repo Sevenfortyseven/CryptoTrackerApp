@@ -62,9 +62,13 @@ class DetailsViewController: UIViewController {
         self.contentView.addSubview(chartTimelineLabel)
         self.contentView.addSubview(coingLogo)
         self.contentView.addSubview(coinDescriptionLabel)
-        self.contentView.addSubview(loadingSpinner)
+        self.contentView.addSubview(additionalDetailsLabel)
         self.contentView.addSubview(coinDescriptionStack)
         self.contentView.addSubview(coinInfoStack)
+        self.contentView.addSubview(additionalDetailsStack)
+        self.contentView.addSubview(LoadingViewContainer)
+        self.LoadingViewContainer.addSubview(loadingSpinner)
+        
     }
     
     private func populateStackView() {
@@ -90,6 +94,33 @@ class DetailsViewController: UIViewController {
         marketCapUpdateAndImageStack.addArrangedSubview(marketCapValueUpdate)
         volumeStack.addArrangedSubview(volumeLabel)
         volumeStack.addArrangedSubview(volumeValue)
+        additionalDetailsStack.addArrangedSubview(additionalDetailsChildLeft)
+        additionalDetailsStack.addArrangedSubview(additionalDetailsChildRight)
+        additionalDetailsChildLeft.addArrangedSubview(priceHigh24HStack)
+        additionalDetailsChildLeft.addArrangedSubview(priceChange24HStack)
+        additionalDetailsChildLeft.addArrangedSubview(blockTimeStack)
+        additionalDetailsChildRight.addArrangedSubview(priceLow24HStack)
+        additionalDetailsChildRight.addArrangedSubview(marketCapChange24HStack)
+        additionalDetailsChildRight.addArrangedSubview(hashingAlgorithmStack)
+        priceHigh24HStack.addArrangedSubview(priceHigh24HLabel)
+        priceHigh24HStack.addArrangedSubview(priceHigh24HValue)
+        priceChange24HStack.addArrangedSubview(priceChange24HLabel)
+        priceChange24HStack.addArrangedSubview(priceChange24HValue)
+        priceChange24HStack.addArrangedSubview(priceChange24HValueUpdateStack)
+        blockTimeStack.addArrangedSubview(blockTimeLabel)
+        blockTimeStack.addArrangedSubview(blockTimeValue)
+        priceLow24HStack.addArrangedSubview(priceLow24HLabel)
+        priceLow24HStack.addArrangedSubview(priceLow24HValue)
+        marketCapChange24HStack.addArrangedSubview(marketCapChange24HLabel)
+        marketCapChange24HStack.addArrangedSubview(marketCapChange24HValue)
+        marketCapChange24HStack.addArrangedSubview(marketCapChange24HValueUpdateStack)
+        hashingAlgorithmStack.addArrangedSubview(hashingAlgorithmLabel)
+        hashingAlgorithmStack.addArrangedSubview(hashingAlgorithmValue)
+        priceChange24HValueUpdateStack.addArrangedSubview(priceChange24HValueUpdateImage)
+        priceChange24HValueUpdateStack.addArrangedSubview(priceChange24HValueUpdate)
+        marketCapChange24HValueUpdateStack.addArrangedSubview(marketCapChange24HValueUpdateImage)
+        marketCapChange24HValueUpdateStack.addArrangedSubview(marketCapChange24HValueUpdate)
+        
     }
     
     
@@ -107,17 +138,28 @@ class DetailsViewController: UIViewController {
             guard let url = data?.imageURL else { return }
             self?.coingLogo.loadImage(urlString: url)
             
+            /// Check if there any description text
+            guard data?.overview != "" else {
+                self?.coinDescriptionTextView.text = "No info available"
+                return
+            }
             self?.coinDescriptionTextView.text = data?.overview
+      
             self?.currentPriceValue.text = data?.currentPrice
-            self?.currentPriceValueUpdate.text = data?.priceChangePercentage24H
+            self?.currentPriceValueUpdate.text = data?.priceChangePercentage60D
             self?.rankValue.text = data?.marketCapRank
             self?.marketCapValue.text = data?.marketCap
             self?.marketCapValueUpdate.text = data?.marketCapChangePercentage24H
             self?.volumeValue.text = data?.totalVolume
-            
-        }
-        /// hide view while vm fetching is in progress
-      
+            self?.priceHigh24HValue.text = data?.highestPriceIn24H
+            self?.priceLow24HValue.text = data?.lowestPriceIn24H
+            self?.priceChange24HValue.text = data?.priceChangeIn24H
+            self?.priceChange24HValueUpdate.text = data?.priceChangePercentage24H
+            self?.marketCapChange24HValue.text = data?.marketCapChange24H
+            self?.marketCapChange24HValueUpdate.text = data?.marketCapChangePercentage24H
+            self?.blockTimeValue.text = data?.blockTimeInMinutes
+            self?.hashingAlgorithmValue.text = data?.hashingAlgorithm
+        }      
         
     }
     
@@ -129,8 +171,10 @@ class DetailsViewController: UIViewController {
     }
     
     private func updateFrames() {
-        loadingSpinner.center = cryptoChart.center
+   
         _ = coinInfoStack.smallCurve
+        LoadingViewContainer.frame = contentView.bounds
+        loadingSpinner.center = LoadingViewContainer.center
     }
     
     private func setUpNavBar() {
@@ -141,13 +185,13 @@ class DetailsViewController: UIViewController {
     private func waitForLoad() {
         if detailsVM.isFetchingInProgress {
             UIView.animate(withDuration: 0.2) {
-                self.cryptoChart.alpha = 0.0
+                self.LoadingViewContainer.alpha = 1
                 self.loadingSpinner.startAnimating()
             }
             
         } else {
-            UIView.animate(withDuration: 0.2) {
-                self.cryptoChart.alpha = 1
+            UIView.animate(withDuration: 0.9) {
+                self.LoadingViewContainer.alpha = 0
                 self.loadingSpinner.stopAnimating()
             }
         }
@@ -155,15 +199,15 @@ class DetailsViewController: UIViewController {
     
     /// Updates value / image color depending on the value data
     private func checkPositiveOrNegativeValues() {
-            if currentPriceValueUpdate.text?.getFirstChar() == "-" {
-                currentPriceUpdateImage.tintColor = .negativeRed
-                currentPriceUpdateImage.rotateBy180(true)
-                currentPriceValueUpdate.textColor = .negativeRed
-            } else {
-                currentPriceUpdateImage.tintColor = .positiveGreen
-                currentPriceValueUpdate.textColor = .positiveGreen
-            }
-            
+        if currentPriceValueUpdate.text?.getFirstChar() == "-" {
+            currentPriceUpdateImage.tintColor = .negativeRed
+            currentPriceUpdateImage.rotateBy180(true)
+            currentPriceValueUpdate.textColor = .negativeRed
+        } else {
+            currentPriceUpdateImage.tintColor = .positiveGreen
+            currentPriceValueUpdate.textColor = .positiveGreen
+        }
+        
         if marketCapValueUpdate.text?.getFirstChar() == "-" {
             marketCapValueUpdateImage.tintColor = .negativeRed
             marketCapValueUpdateImage.rotateBy180(true)
@@ -172,10 +216,32 @@ class DetailsViewController: UIViewController {
             marketCapValueUpdateImage.tintColor = .positiveGreen
             marketCapValueUpdate.textColor = .positiveGreen
         }
-       
+        if priceChange24HValueUpdate.text?.getFirstChar() == "-" {
+            priceChange24HValueUpdateImage.tintColor = .negativeRed
+            priceChange24HValueUpdateImage.rotateBy180(true)
+            priceChange24HValueUpdate.textColor = .negativeRed
+        } else {
+            priceChange24HValueUpdateImage.tintColor = .positiveGreen
+            priceChange24HValueUpdate.textColor = .positiveGreen
+        }
+        
+        if marketCapChange24HValueUpdate.text?.getFirstChar() == "-" {
+            marketCapChange24HValueUpdateImage.tintColor = .negativeRed
+            marketCapChange24HValueUpdate.textColor = .negativeRed
+        } else {
+            marketCapChange24HValueUpdateImage.tintColor = .positiveGreen
+            marketCapChange24HValueUpdate.textColor = .positiveGreen
+        }
+        
     }
     
     // MARK: - UI Elements
+    
+    private let LoadingViewContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .primaryColor
+        return view
+    }()
     
     
     private let cryptoChart: LineChartView = {
@@ -230,6 +296,7 @@ class DetailsViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("Read more", for: .normal)
         button.tintColor = .borderColor
+        button.alpha = 0.5
         button.addTarget(self, action: #selector(expandCoinDetailsTextView), for: .touchUpInside)
         button.titleLabel?.font = .preferredFont(forTextStyle: .footnote, compatibleWith: .init(legibilityWeight: .bold))
         return button
@@ -240,14 +307,14 @@ class DetailsViewController: UIViewController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.distribution = .fill
         stack.alignment = .leading
-        stack.spacing = 1
+        stack.spacing = -5
         stack.isUserInteractionEnabled = true
         stack.axis = .vertical
         return stack
     }()
     
     private let loadingSpinner: UIActivityIndicatorView = {
-        let spinner = UIActivityIndicatorView(style: .medium)
+        let spinner = UIActivityIndicatorView(style: .large)
         spinner.color = .borderColor
         return spinner
     }()
@@ -434,7 +501,228 @@ class DetailsViewController: UIViewController {
         return label
     }()
     
+    private let additionalDetailsLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Additional Details"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .title1, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
     
+    private let additionalDetailsStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.distribution = .fillEqually
+//        stack.spacing = 120
+        stack.alignment = .center
+        return stack
+    }()
+    
+    private let additionalDetailsChildLeft: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.distribution = .fill
+        stack.spacing = 20
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private let additionalDetailsChildRight: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.distribution = .fill
+        stack.spacing = 20
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private let priceHigh24HStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = 3
+        stack.distribution = .fill
+        return stack
+    }()
+    
+    private let priceLow24HStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = 3
+        stack.distribution = .fill
+        return stack
+    }()
+    
+    private let priceChange24HStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = 3
+        stack.distribution = .fill
+        return stack
+    }()
+    
+    private let marketCapChange24HStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 3
+        stack.distribution = .fill
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private let hashingAlgorithmStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.distribution = .fill
+        stack.spacing = 3
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private let blockTimeStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.distribution = .fill
+        stack.spacing = 3
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private let priceChange24HValueUpdateStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fill
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private let marketCapChange24HValueUpdateStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.alignment = .fill
+        stack.distribution = .fill
+        return stack
+    }()
+    
+    private let priceHigh24HLabel: UILabel = {
+        let label = UILabel()
+        label.text = "24h High"
+        label.textColor = .borderColor
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let priceHigh24HValue: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        return label
+    }()
+    
+    private let priceLow24HLabel: UILabel = {
+        let label = UILabel()
+        label.text = "24h Low"
+        label.textColor = .borderColor
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let priceLow24HValue: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        return label
+    }()
+    
+    private let priceChange24HLabel: UILabel = {
+        let label = UILabel()
+        label.text = "24h Price Change"
+        label.textColor = .borderColor
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let priceChange24HValue: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .headline)
+        label.textColor = .white
+        return label
+    }()
+    
+    private let priceChange24HValueUpdate: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .subheadline)
+        return label
+    }()
+    
+    private let priceChange24HValueUpdateImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "triangle_Fill")
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
+    private let marketCapChange24HLabel: UILabel = {
+        let label = UILabel()
+        label.text = "24h Market Cap"
+        label.textColor = .borderColor
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let marketCapChange24HValue: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        return label
+    }()
+    
+    private let marketCapChange24HValueUpdate: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .subheadline)
+        return label
+    }()
+    
+    private let marketCapChange24HValueUpdateImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "triangle_Fill")
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
+    private let blockTimeLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Block Time"
+        label.textColor = .borderColor
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let blockTimeValue: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        return label
+    }()
+    
+    private let hashingAlgorithmLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Hashing Algorithm"
+        label.textColor = .borderColor
+        label.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return label
+    }()
+    
+    private let hashingAlgorithmValue: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        return label
+    }()
 }
 
 // MARK: - Button actions
@@ -442,7 +730,9 @@ class DetailsViewController: UIViewController {
 extension DetailsViewController {
     
     @objc private func expandCoinDetailsTextView() {
-        if !isMorePressed {
+        /// Get the number of lines for textView
+        let numLines = Int(coinDescriptionTextView.contentSize.height / coinDescriptionTextView.font!.lineHeight)
+        if !isMorePressed, numLines > 3 {
             coinDescriptionTextView.textContainer.maximumNumberOfLines = 0
             coinDescriptionTextView.invalidateIntrinsicContentSize()
             readMoreBtn.setTitle("Less", for: .normal)
@@ -471,9 +761,8 @@ extension DetailsViewController {
         let topPadding                     = CGFloat(25)
         let imagePaddingRight              = CGFloat(-15)
         let leftPadding                    = CGFloat(25)
-        let textPaddingLeft                = CGFloat(5)
-        let textPaddingRight               = CGFloat(-5)
-        let rightPadding                   = CGFloat(-25)
+        let textViewMultiplier             = CGFloat(0.96)
+//        let rightPadding                   = CGFloat(-25)
         let paddingBetweenObjects          = CGFloat(20)
         
         var constraints = [NSLayoutConstraint]()
@@ -499,9 +788,9 @@ extension DetailsViewController {
         
         /// Coin description Stack
         constraints.append(coinDescriptionStack.topAnchor.constraint(equalTo: coinDescriptionLabel.bottomAnchor, constant: paddingBetweenObjects))
-        constraints.append(coinDescriptionStack.leadingAnchor.constraint(equalTo: self.contentView.safeAreaLayoutGuide.leadingAnchor, constant: textPaddingLeft))
-        constraints.append(coinDescriptionStack.trailingAnchor.constraint(equalTo: self.contentView.safeAreaLayoutGuide.trailingAnchor, constant: textPaddingRight))
-        
+        constraints.append(coinDescriptionStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        constraints.append(coinDescriptionStack.widthAnchor.constraint(equalTo: contentView.widthAnchor, multiplier: textViewMultiplier))
+        constraints.append(coinDescriptionTextView.widthAnchor.constraint(equalTo: coinDescriptionStack.widthAnchor))
         
         /// ScrollView
         constraints.append(mainScrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor))
@@ -518,10 +807,20 @@ extension DetailsViewController {
  
         /// Coin Data Stack
         constraints.append(coinInfoStack.topAnchor.constraint(equalTo: coinDescriptionStack.bottomAnchor, constant: paddingBetweenObjects))
-        constraints.append(coinInfoStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
-//        constraints.append(coinInfoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
-//        constraints.append(coinInfoStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: rightPadding))
-        constraints.append(coinInfoStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50))
+        constraints.append(coinInfoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        
+        
+        /// Additional Details Label
+        constraints.append(additionalDetailsLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        constraints.append(additionalDetailsLabel.topAnchor.constraint(equalTo: coinInfoStack.bottomAnchor, constant: paddingBetweenObjects))
+        
+        /// Additional Details stack
+//        constraints.append(additionalDetailsStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        constraints.append(additionalDetailsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        constraints.append(additionalDetailsStack.topAnchor.constraint(equalTo: additionalDetailsLabel.bottomAnchor, constant: paddingBetweenObjects))
+        constraints.append(additionalDetailsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200))
+        constraints.append(additionalDetailsChildRight.leadingAnchor.constraint(equalTo: marketCapAndVolumeStack.leadingAnchor, constant: 0))
+        
         
         NSLayoutConstraint.activate(constraints)
         

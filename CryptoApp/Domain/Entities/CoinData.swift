@@ -19,6 +19,8 @@ struct CoinDataDTO: Codable {
     let description: Description
     let image: Image
     let marketData: MarketData
+    let blockTimeInMinutes: Int?
+    let hashingAlgorithm: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -27,6 +29,8 @@ struct CoinDataDTO: Codable {
         case description
         case image
         case marketData = "market_data"
+        case blockTimeInMinutes = "block_time_in_minutes"
+        case hashingAlgorithm = "hashing_algorithm"
     }
 }
 
@@ -46,9 +50,14 @@ struct MarketData: Codable {
     let marketCap: [String: Double]
     let marketCapRank: Int
     let priceChangePercentage24H: Double
+    let priceChangePercentage60D: Double
     let sparkline7D: Sparkline7D
     let marketCapChangePercentage24H: Double
     let totalVolume: [String: Double]
+    let high24H: [String: Double]
+    let low24H: [String: Double]
+    let priceChange24H: Double
+    let marketCapChange24H: Double
     
     enum CodingKeys: String, CodingKey {
         case currentPrice = "current_price"
@@ -58,6 +67,11 @@ struct MarketData: Codable {
         case priceChangePercentage24H = "price_change_percentage_24h"
         case marketCapChangePercentage24H = "market_cap_change_percentage_24h"
         case totalVolume = "total_volume"
+        case high24H = "high_24h"
+        case low24H = "low_24h"
+        case priceChange24H = "price_change_24h"
+        case priceChangePercentage60D = "price_change_percentage_60d"
+        case marketCapChange24H = "market_cap_change_24h"
     }
 }
 
@@ -76,9 +90,16 @@ struct CoinData {
     let imageURL: String
     let overview: String
     let priceChangePercentage24H: String
+    let priceChangePercentage60D: String
     let marketCapRank: String
     let marketCapChangePercentage24H: String
     let totalVolume: String
+    let highestPriceIn24H: String
+    let lowestPriceIn24H: String
+    let priceChangeIn24H: String
+    let marketCapChange24H: String
+    let blockTimeInMinutes: String
+    let hashingAlgorithm: String
     
     init(_ coinData: CoinDataDTO) {
         
@@ -98,15 +119,35 @@ struct CoinData {
         } else {
             self.totalVolume = ""
         }
+        if let highestPriceIn24HInUSD = coinData.marketData.high24H.first(where: { $0.key == "usd" }) {
+            self.highestPriceIn24H = "$" + highestPriceIn24HInUSD.value.transformToCurrencyWith6Decimals()
+        } else {
+            self.highestPriceIn24H = ""
+        }
+        if let lowestPriceIn24HInUSD = coinData.marketData.low24H.first(where: { $0.key == "usd" }) {
+            self.lowestPriceIn24H = "$" + lowestPriceIn24HInUSD.value.transformToCurrencyWith6Decimals()
+        } else {
+            self.lowestPriceIn24H = ""
+        }
         
         self.sparkLine7D = coinData.marketData.sparkline7D.price
         self.coinName = coinData.name
         self.imageURL = coinData.image.small
 
         self.overview = coinData.description.en.removeOccurances
-        self.priceChangePercentage24H = coinData.marketData.priceChangePercentage24H.transformToPercentString()
+        self.priceChangePercentage60D = coinData.marketData.priceChangePercentage60D.transformToPercentString()
         self.marketCapRank = String(coinData.marketData.marketCapRank)
         self.marketCapChangePercentage24H = coinData.marketData.marketCapChangePercentage24H.transformToPercentString()
+        self.priceChangeIn24H = coinData.marketData.priceChange24H.transformToCurrencyWith6Decimals()
+        self.priceChangePercentage24H = coinData.marketData.priceChangePercentage24H.transformToPercentString()
+        self.marketCapChange24H = coinData.marketData.marketCapChange24H.formattedWithAbbreviations()
         
+        if let blockTimeInMinutes = coinData.blockTimeInMinutes {
+            self.blockTimeInMinutes = String(blockTimeInMinutes) + " Min"
+        } else {
+            self.blockTimeInMinutes = "No Data"
+        }
+        
+        self.hashingAlgorithm = coinData.hashingAlgorithm ?? "No Data"
     }
 }

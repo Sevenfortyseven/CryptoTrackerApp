@@ -468,19 +468,19 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         cryptoListTableView.delegate = self
         cryptoListTableView.dataSource = self
     }
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.numberOfCells
         
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = cryptoListTableView.dequeueReusableCell(withIdentifier: CryptoListTableViewCell.reuseID, for: indexPath) as! CryptoListTableViewCell
         cell.cellViewModel = viewModel.getCellVM(at: indexPath)
-       return cell
-
+        return cell
+        
     }
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
