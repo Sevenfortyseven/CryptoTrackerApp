@@ -45,14 +45,14 @@ class DetailsViewController: UIViewController {
         setUpNavBar()
         
     }
-
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
         mainScrollView.layoutIfNeeded()
         updateFrames()
         checkPositiveOrNegativeValues()
-
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -172,7 +172,7 @@ class DetailsViewController: UIViewController {
             self?.marketCapChange24HValueUpdate.text = data?.marketCapChangePercentage24H
             self?.blockTimeValue.text = data?.blockTimeInMinutes
             self?.hashingAlgorithmValue.text = data?.hashingAlgorithm
-
+            
         }
         detailsVM.homepageLink.bind { [weak self] url in
             self?.homepageLink = url
@@ -194,7 +194,7 @@ class DetailsViewController: UIViewController {
     }
     
     private func updateFrames() {
-   
+        
         _ = coinInfoStack.smallCurve
         LoadingViewContainer.frame = contentView.bounds
         loadingSpinner.center = LoadingViewContainer.center
@@ -202,7 +202,7 @@ class DetailsViewController: UIViewController {
     
     private func setUpNavBar() {
         self.navigationItem.titleView?.alpha = 1
-    
+        
     }
     
     private func waitForLoad() {
@@ -539,7 +539,7 @@ class DetailsViewController: UIViewController {
         stack.axis = .horizontal
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.distribution = .fillEqually
-//        stack.spacing = 120
+        //        stack.spacing = 120
         stack.alignment = .center
         return stack
     }()
@@ -848,15 +848,15 @@ extension DetailsViewController {
         let topPadding                     = CGFloat(25)
         let imagePaddingRight              = CGFloat(-15)
         let leftPadding                    = CGFloat(25)
-        let textViewMultiplier             = CGFloat(0.96)
-//        let rightPadding                   = CGFloat(-25)
+        let contentViewWidthMultiplier             = CGFloat(0.96)
+        //        let rightPadding                   = CGFloat(-25)
         let paddingBetweenObjects          = CGFloat(20)
         
         var constraints = [NSLayoutConstraint]()
         
         /// Crypto chart
-        constraints.append(cryptoChart.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor))
-        constraints.append(cryptoChart.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor))
+        constraints.append(cryptoChart.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        constraints.append(cryptoChart.widthAnchor.constraint(equalTo: contentView.widthAnchor, multiplier: contentViewWidthMultiplier))
         constraints.append(cryptoChart.topAnchor.constraint(equalTo: chartTimelineLabel.bottomAnchor, constant: paddingBetweenObjects))
         constraints.append(cryptoChart.heightAnchor.constraint(equalTo: self.view.heightAnchor, multiplier: chartHeightMultiplier))
         
@@ -867,7 +867,7 @@ extension DetailsViewController {
         /// Coin name label
         constraints.append(chartTimelineLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: leftPadding))
         constraints.append(chartTimelineLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: topPadding))
-    
+        
         
         /// Coin description label
         constraints.append(coinDescriptionLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: leftPadding))
@@ -876,7 +876,7 @@ extension DetailsViewController {
         /// Coin description Stack
         constraints.append(coinDescriptionStack.topAnchor.constraint(equalTo: coinDescriptionLabel.bottomAnchor, constant: paddingBetweenObjects))
         constraints.append(coinDescriptionStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
-        constraints.append(coinDescriptionStack.widthAnchor.constraint(equalTo: contentView.widthAnchor, multiplier: textViewMultiplier))
+        constraints.append(coinDescriptionStack.widthAnchor.constraint(equalTo: contentView.widthAnchor, multiplier: contentViewWidthMultiplier))
         constraints.append(coinDescriptionTextView.widthAnchor.constraint(equalTo: coinDescriptionStack.widthAnchor))
         
         /// ScrollView
@@ -891,10 +891,10 @@ extension DetailsViewController {
         constraints.append(contentView.topAnchor.constraint(equalTo: mainScrollView.topAnchor))
         constraints.append(contentView.bottomAnchor.constraint(equalTo: mainScrollView.bottomAnchor))
         constraints.append(contentView.widthAnchor.constraint(equalTo: mainScrollView.widthAnchor))
- 
+        
         /// Coin Data Stack
         constraints.append(coinInfoStack.topAnchor.constraint(equalTo: coinDescriptionStack.bottomAnchor, constant: paddingBetweenObjects))
-//        constraints.append(coinInfoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        //        constraints.append(coinInfoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
         constraints.append(coinInfoStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
         
         
@@ -903,17 +903,17 @@ extension DetailsViewController {
         constraints.append(additionalDetailsLabel.topAnchor.constraint(equalTo: coinInfoStack.bottomAnchor, constant: paddingBetweenObjects))
         
         /// Additional Details stack
-//        constraints.append(additionalDetailsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
+        //        constraints.append(additionalDetailsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
         constraints.append(additionalDetailsStack.topAnchor.constraint(equalTo: additionalDetailsLabel.bottomAnchor, constant: paddingBetweenObjects))
         constraints.append(additionalDetailsChildLeft.leadingAnchor.constraint(equalTo: currentPriceAndRankStack.leadingAnchor))
-//        constraints.append(additionalDetailsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200))
+        //        constraints.append(additionalDetailsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -200))
         constraints.append(additionalDetailsChildRight.leadingAnchor.constraint(equalTo: marketCapAndVolumeStack.leadingAnchor))
-//        constraints.append(additionalDetailsStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
+        //        constraints.append(additionalDetailsStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))
         
         /// External links label
         constraints.append(externalLinksLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: leftPadding))
         constraints.append(externalLinksLabel.topAnchor.constraint(equalTo: additionalDetailsStack.bottomAnchor, constant: paddingBetweenObjects))
-  
+        
         
         /// Homepage link button
         constraints.append(externalLinksStack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor))

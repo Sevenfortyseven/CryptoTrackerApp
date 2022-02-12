@@ -14,7 +14,7 @@ class HomeViewModel {
     
     public var cellVMs = [CryptoCellViewModel]() {
         didSet {
-            tableViewNeedsReload.value = !tableViewNeedsReload.value!
+            cellVMWasUpdated.value = !cellVMWasUpdated.value
         }
     }
     
@@ -22,6 +22,12 @@ class HomeViewModel {
     public func initDetailsVM(for indexPath: IndexPath) -> DetailsViewModel? {
         guard let coinData = coinData else { return nil }
         return DetailsViewModel(coinID: coinData[indexPath.row].id)
+    }
+    
+    public func initPortfolioVM() -> PortfolioViewModel? {
+        guard let globalData = globalData.value else { return nil }
+        return PortfolioViewModel(globalData)
+        
     }
     
     // Filter cellVM-s according to the  text input
@@ -42,16 +48,23 @@ class HomeViewModel {
         }
     }
     //
-    public var isTableViewLoading: Bool = false {
+    public var isCoinListDataLoading: Bool = false {
         didSet {
-            tableViewIsReloading.value = !tableViewIsReloading.value!
+            dataNeedsRefetching.value = !dataNeedsRefetching.value
+        }
+    }
+    
+    public var isGlobalDataLoading: Bool = false {
+        didSet {
+            dataFetchInProgress.value = !dataFetchInProgress.value
         }
     }
     
     
-    public var tableViewNeedsReload: ObservableObject<Bool?> = ObservableObject(value: false)
-    public var tableViewIsReloading: ObservableObject<Bool?> = ObservableObject(value: false)
+    public var cellVMWasUpdated: ObservableObject<Bool> = ObservableObject(value: false)
+    public var dataNeedsRefetching: ObservableObject<Bool> = ObservableObject(value: false)
     public var globalData: ObservableObject<GlobalData?> = ObservableObject(value: nil)
+    public var dataFetchInProgress: ObservableObject<Bool> = ObservableObject(value: true)
     public var isAscendingByPrice: Bool = false
     public var isAscendingByRank: Bool = false
     
@@ -61,6 +74,7 @@ class HomeViewModel {
     
     public init() {
         fetchData()
+        isGlobalDataLoading = true
         observe()
     }
     
@@ -122,12 +136,12 @@ class HomeViewModel {
         
     }
     
-    
-    private func fetchData(_ sortBy: String = EndpointCustomParams.descending.rawValue) {
+
+    private func fetchData() {
         // Fetch Separate Coin data
-        isTableViewLoading = true
+        isCoinListDataLoading = true
         NetworkEngine.request(endpoint: CoinGeckoEndpoint.CoinList) { [weak self] (result: Result<CoinListDTOResponse, Error>) in
-            self?.isTableViewLoading = false
+            self?.isCoinListDataLoading = false
             switch result {
             case .success(let response):
                 let mappedData = response.map {
@@ -141,6 +155,7 @@ class HomeViewModel {
         }
         // Fetch Global market Data
         NetworkEngine.request(endpoint: CoinGeckoEndpoint.Global) { [weak self] (result: Result<GlobalDataDTOResponse, Error>) in
+            self?.isGlobalDataLoading = false
             switch result {
             case .success(let response):
                 let mappedData = GlobalData(response.data)
