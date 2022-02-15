@@ -51,7 +51,7 @@ class SearchbarModule: UIView {
         
         var constraints = [NSLayoutConstraint]()
         
-        constraints.append(searchBar.leadingAnchor.constraint(equalTo: self.leadingAnchor))
+        constraints.append(searchBar.searchTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor))
         constraints.append(searchBar.bottomAnchor.constraint(equalTo: self.bottomAnchor))
         constraints.append(searchBar.trailingAnchor.constraint(equalTo: self.trailingAnchor))
         constraints.append(searchBar.topAnchor.constraint(equalTo: self.topAnchor))

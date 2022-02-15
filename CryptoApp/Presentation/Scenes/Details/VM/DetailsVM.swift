@@ -78,7 +78,7 @@ class DetailsViewModel {
                 entries.append(ChartDataEntry(x: pricesAccending.removeFirst(), y: price))
             }
         }
-        let set = LineChartDataSet(entries: entries, label: "Weekly Timeline")
+        let set = LineChartDataSet(entries: entries, label: "Price Data")
         _ = set.customSetOptions
         let data = LineChartData(dataSet: set)
         data.setDrawValues(false)

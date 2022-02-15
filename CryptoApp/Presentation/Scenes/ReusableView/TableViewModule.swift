@@ -23,6 +23,7 @@ class TableViewModule: UIView {
     
     private func initialize() {
         self.translatesAutoresizingMaskIntoConstraints = false
+        sortByHoldingsStack.isHidden = true
         addSubviews()
         populateStackView()
         initializeConstraints()
@@ -34,17 +35,31 @@ class TableViewModule: UIView {
         self.addSubview(priceAndRefreshStackView)
         self.addSubview(sortByRankStackView)
         self.addSubview(tableViewLoadingSpinner)
+        self.addSubview(sortByHoldingsStack)
+        self.addSubview(refreshBtn)
     }
     
     private func populateStackView() {
         priceAndRefreshStackView.addArrangedSubview(sortByPriceBtn)
         priceAndRefreshStackView.addArrangedSubview(sortingImageForPriceBtn)
-        priceAndRefreshStackView.addArrangedSubview(refreshBtn)
-       
         sortByRankStackView.addArrangedSubview(sortByRankBtn)
         sortByRankStackView.addArrangedSubview(sortingImageForRankBtn)
+        sortByHoldingsStack.addArrangedSubview(sortByHoldingsBtn)
+        sortByHoldingsStack.addArrangedSubview(sortingImageForHoldingsBtn)
     }
     
+    ///Change Layout Depending on the current superview
+    enum LayoutStyle {
+        case portfolio
+    }
+    
+    public func changeLayout(_ layoutStyle: LayoutStyle) {
+        switch layoutStyle {
+        case .portfolio:
+            sortByHoldingsStack.isHidden = false
+            refreshBtn.isHidden = true
+        }
+    }
     
     
     // MARK: - UI Elements
@@ -65,9 +80,19 @@ class TableViewModule: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.alignment = .fill
         stackView.distribution = .fill
-        stackView.spacing = 5
+        stackView.spacing = 1
         stackView.axis = .horizontal
         return stackView
+    }()
+    
+    private let sortByHoldingsStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.alignment = .fill
+        stack.spacing = 1
+        stack.distribution = .fill
+        return stack
     }()
     
     private let sortByRankStackView: UIStackView = {
@@ -75,7 +100,7 @@ class TableViewModule: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.alignment = .fill
         stackView.distribution = .fill
-        stackView.spacing = 5
+        stackView.spacing = 1
         stackView.axis = .horizontal
         return stackView
     }()
@@ -114,6 +139,7 @@ class TableViewModule: UIView {
         imageView.image = UIImage(systemName: "chevron.down")
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .white
+        imageView.isHidden = true
         return imageView
     }()
     
@@ -122,6 +148,7 @@ class TableViewModule: UIView {
         imageView.image = UIImage(systemName: "chevron.down")
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .white
+        imageView.isHidden = true
         return imageView
     }()
     
@@ -133,6 +160,23 @@ class TableViewModule: UIView {
         return spinner
     }()
     
+    public let sortByHoldingsBtn: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("Holdings", for: .normal)
+        btn.tintColor = .white
+        btn.titleLabel?.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: .init(legibilityWeight: .bold))
+        return btn
+    }()
+    
+    public let sortingImageForHoldingsBtn: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "chevron.down")
+        imageView.contentMode = .scaleAspectFit
+        imageView.isHidden = true
+        imageView.tintColor = .white
+        return imageView
+    }()
+    
     
     // MARK: - Constraints
     
@@ -140,6 +184,7 @@ class TableViewModule: UIView {
         var constraints            = [NSLayoutConstraint]()
         let paddingBetweenObjects  = CGFloat(20)
         let buttonSize             = CGFloat(20)
+        let rightPadding           = CGFloat(-15)
         
         // left Stack
         constraints.append(sortByRankStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor))
@@ -147,7 +192,11 @@ class TableViewModule: UIView {
         
         // Right Stack
         constraints.append(priceAndRefreshStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor))
-        constraints.append(priceAndRefreshStackView.topAnchor.constraint(equalTo: self.topAnchor))
+        constraints.append(priceAndRefreshStackView.centerYAnchor.constraint(equalTo: sortByRankStackView.centerYAnchor))
+        
+        // Middle Stack
+        constraints.append(sortByHoldingsStack.centerYAnchor.constraint(equalTo: sortByRankStackView.centerYAnchor))
+        constraints.append(sortByHoldingsStack.centerXAnchor.constraint(equalTo: self.centerXAnchor))
         
         // TableView
         constraints.append(cryptoListTableView.leadingAnchor.constraint(equalTo: self.leadingAnchor))
@@ -158,6 +207,8 @@ class TableViewModule: UIView {
         // Refresh Button
         constraints.append(refreshBtn.widthAnchor.constraint(equalToConstant: buttonSize))
         constraints.append(refreshBtn.heightAnchor.constraint(equalToConstant: buttonSize))
+        constraints.append(refreshBtn.centerYAnchor.constraint(equalTo: priceAndRefreshStackView.centerYAnchor))
+        constraints.append(refreshBtn.trailingAnchor.constraint(equalTo: priceAndRefreshStackView.leadingAnchor, constant: rightPadding))
         
         // Activity Indicator
         constraints.append(tableViewLoadingSpinner.centerXAnchor.constraint(equalTo: self.centerXAnchor))

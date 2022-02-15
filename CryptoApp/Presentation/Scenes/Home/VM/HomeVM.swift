@@ -8,8 +8,8 @@
 import Foundation
 
 
-class HomeViewModel {
-    
+class HomeViewModel: SharedDataDelegate {
+
     // MARK: - Public
     
     public var cellVMs = [CryptoCellViewModel]() {
@@ -25,8 +25,8 @@ class HomeViewModel {
     }
     
     public func initPortfolioVM() -> PortfolioViewModel? {
-        guard let globalData = globalData.value else { return nil }
-        return PortfolioViewModel(globalData)
+        guard let globalData = globalData.value, let coinData = coinData else { return nil }
+        return PortfolioViewModel(globalData, coinData, sharedData, sharedHoldings: sharedHoldingsValue )
         
     }
     
@@ -65,9 +65,8 @@ class HomeViewModel {
     public var dataNeedsRefetching: ObservableObject<Bool> = ObservableObject(value: false)
     public var globalData: ObservableObject<GlobalData?> = ObservableObject(value: nil)
     public var dataFetchInProgress: ObservableObject<Bool> = ObservableObject(value: true)
-    public var isAscendingByPrice: Bool = false
-    public var isAscendingByRank: Bool = false
     
+
     public var numberOfCells: Int {
         return cellVMs.count
     }
@@ -118,19 +117,19 @@ class HomeViewModel {
         NotificationCenter.default.addObserver(forName: .reorderByRank, object: nil, queue: .main) { [weak self] _ in
             if self?.isAscendingByRank == true {
                 self?.sortData(.RankDescending)
-                self?.isAscendingByRank = false
+//                self?.isAscendingByRank = false
             } else {
                 self?.sortData(.RankAscending)
-                self?.isAscendingByRank = true
+//                self?.isAscendingByRank = true
             }
         }
         NotificationCenter.default.addObserver(forName: .reorderByPrice, object: nil, queue: .main) { [weak self] _ in
             if self?.isAscendingByPrice == false {
                 self?.sortData(.PriceAscending)
-                self?.isAscendingByPrice = true
+//                self?.isAscendingByPrice = true
             } else {
                 self?.sortData(.PriceDescending)
-                self?.isAscendingByPrice = false
+//                self?.isAscendingByPrice = false
             }
         }
         
@@ -145,7 +144,7 @@ class HomeViewModel {
             switch result {
             case .success(let response):
                 let mappedData = response.map {
-                    return CoinList(name: $0.name, symbol: $0.symbol, imageURL: $0.image, currentPrice: $0.currentPrice, priceChangePercentage24H: $0.priceChangePercentage24H, marketCapRank: $0.marketCapRank ?? 999, id: $0.id)
+                    return CoinList(name: $0.name, symbol: $0.symbol, imageURL: $0.image, currentPrice: $0.currentPrice, priceChangePercentage24H: $0.priceChangePercentage24H, marketCapRank: $0.marketCapRank ?? 999, id: $0.id, isOwned: false, holdings: 0)
                 }
                 self?.coinData = mappedData
                 self?.processFetchedData(mappedData)
@@ -175,7 +174,7 @@ class HomeViewModel {
         let priceChange = coinList.priceChangePercentage24H ?? 0
         let marketCapRank = coinList.marketCapRank
         
-        return CryptoCellViewModel(name: coinName, symbol: coinSymbol, iconURL: coinImageURL, currentPrice: currentPrice, priceChangePercentage24H: priceChange, marketCapRank: marketCapRank)
+        return CryptoCellViewModel(name: coinName, symbol: coinSymbol, iconURL: coinImageURL, currentPrice: currentPrice, priceChangePercentage24H: priceChange, marketCapRank: marketCapRank, holdingsCount: nil, holdingsValue: nil)
     }
     
     /// Transforms coin list array into CellVM-s array
@@ -187,6 +186,26 @@ class HomeViewModel {
         self.unfilteredCellVMs = cellViewModels
         self.cellVMs = cellViewModels
     }
+    
+    
+    // MARK: - Data Sorting
+    
+    public var onAscendingByPrice: ((Bool) -> Void)?
+    public var onAscendingByRank: ((Bool) -> Void)?
+    
+    public var isAscendingByPrice: Bool = false {
+        didSet {
+         
+            onAscendingByPrice?(isAscendingByPrice)
+        }
+    }
+    public var isAscendingByRank: Bool = false {
+        didSet {
+            print(isAscendingByRank)
+            onAscendingByRank?(isAscendingByRank)
+        }
+    }
+    
     
     /// Sorts both  model data  and cell viewModel data by given  option from SortData enum
     private func sortData(_ sortBy: SortData) {
@@ -227,4 +246,9 @@ class HomeViewModel {
         case PriceDescending
     }
     
+    // Poor man's CoreData
+    var sharedData = [CryptoCellViewModel]()
+    var sharedHoldingsValue: Double = 0
+    
+
 }

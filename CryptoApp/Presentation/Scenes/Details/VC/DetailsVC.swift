@@ -800,7 +800,7 @@ extension DetailsViewController {
         
         /// Get the number of lines for textView
         let numLines = Int(coinDescriptionTextView.contentSize.height / coinDescriptionTextView.font!.lineHeight)
-        if !isMorePressed, numLines > 2 {
+        if !isMorePressed, numLines > 4 {
             coinDescriptionTextView.textContainer.maximumNumberOfLines = 0
             coinDescriptionTextView.invalidateIntrinsicContentSize()
             readMoreBtn.setTitle("Less", for: .normal)

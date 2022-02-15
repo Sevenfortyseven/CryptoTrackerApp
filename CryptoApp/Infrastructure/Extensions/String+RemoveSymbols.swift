@@ -10,8 +10,10 @@ import Foundation
 
 extension String {
     
-    /// Remove html occurances from string
+    /// Remove occurances from string
     public var removeOccurances: String {
         return self.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
     }
+    
+    
 }

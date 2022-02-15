@@ -21,8 +21,8 @@ class HomeViewController: UIViewController {
     private var tableViewModule = TableViewModule()
  
     /// Bool value for an imageView that updates after user presses sortBy options
-    private var isPriceImageRotated: Bool = false
-    private var isRankImageRotated: Bool = false
+//    private var isPriceImageRotated: Bool = false
+//    private var isRankImageRotated: Bool = false
     
     
     // MARK: - Initialization
@@ -37,11 +37,13 @@ class HomeViewController: UIViewController {
         startListening()
         addTapGestureRecognizer()
         addTargets()
+        updateUIAfterInteraction()
        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        print(viewModel.sharedData.count)
         UIView.animate(withDuration: 0.2) {
             self.navigationController?.navigationBar.isHidden = true
         }
@@ -83,7 +85,6 @@ class HomeViewController: UIViewController {
             }
         }
         
-        
         viewModel.cellVMWasUpdated.bind { [weak self] _ in
             self?.tableViewModule.cryptoListTableView.reloadData()
         }
@@ -103,10 +104,10 @@ class HomeViewController: UIViewController {
         }
         
         viewModel.globalData.bind { [weak self] listener in
-            self?.marketInfoModule.marketCapValue.text = listener?.totalMarketCap
-            self?.marketInfoModule.marketCapValueUpdate.text = listener?.marketCapChangePercentage24HUsd
-            self?.marketInfoModule.volume24HLabelValue.text = listener?.totalVolume
-            self?.marketInfoModule.btcDominanceValue.text = listener?.marketCapPercentage
+            self?.marketInfoModule.marketInfoItem1Value.text = listener?.totalMarketCap
+            self?.marketInfoModule.marketInfoItem1ValueUpdate.text = listener?.marketCapChangePercentage24HUsd
+            self?.marketInfoModule.marketInfoItem2Value.text = listener?.totalVolume
+            self?.marketInfoModule.marketInfoItem3Value.text = listener?.marketCapPercentage
         }
     }
     
@@ -115,11 +116,6 @@ class HomeViewController: UIViewController {
     private func updateUI() {
         self.view.backgroundColor = .primaryColor
         navigationController?.navigationBar.barTintColor = .primaryColor
-        UIView.animate(withDuration: 1) {
-            self.tableViewModule.sortingImageForPriceBtn.isHidden = true
-            self.tableViewModule.sortingImageForRankBtn.isHidden = true
-        }
-       
     }
     
     private func updateFrames() {
@@ -131,24 +127,31 @@ class HomeViewController: UIViewController {
     
    
     
+    
+    
+    
     // Check for UI changes after sorting buttons are pressed
     private func updateUIAfterInteraction() {
-        if viewModel.isAscendingByPrice == true {
-            tableViewModule.sortingImageForPriceBtn.isHidden = false
-            tableViewModule.sortingImageForPriceBtn.rotateBy180(true)
-            isPriceImageRotated = true
-        } else {
-            tableViewModule.sortingImageForPriceBtn.rotateBy180(false)
-            isPriceImageRotated = false
+        
+        viewModel.onAscendingByRank = { [weak self] bool in
+            switch bool {
+            case true:
+                self?.tableViewModule.sortingImageForRankBtn.isHidden = false
+                self?.tableViewModule.sortingImageForRankBtn.rotateBy180(true)
+            case false:
+                self?.tableViewModule.sortingImageForRankBtn.rotateBy180(false)
+            }
         }
-        if viewModel.isAscendingByRank == true {
-            tableViewModule.sortingImageForRankBtn.isHidden = false
-            tableViewModule.sortingImageForRankBtn.rotateBy180(true)
-            isRankImageRotated = true
-        } else {
-            tableViewModule.sortingImageForRankBtn.rotateBy180(false)
-            isRankImageRotated = true
+        viewModel.onAscendingByPrice = { [weak self] bool in
+            switch bool {
+            case true:
+                self?.tableViewModule.sortingImageForPriceBtn.isHidden = false
+                self?.tableViewModule.sortingImageForPriceBtn.rotateBy180(true)
+            case false:
+                self?.tableViewModule.sortingImageForPriceBtn.rotateBy180(false)
+            }
         }
+
         
     }
     
@@ -180,7 +183,6 @@ extension HomeViewController: UISearchBarDelegate {
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print("textDidChange")
         viewModel.searchText = searchText
     }
     
@@ -209,23 +211,21 @@ extension HomeViewController {
     @objc private func refreshData() {
         NotificationCenter.default.post(name: .refreshData, object: nil)
         tableViewModule.refreshBtn.rotate()
-        updateUI()
+//        updateUI()
     }
     
     /// Updates VM to re-order Coin data by ascending or descending
     @objc private func reorderDataByRank() {
         NotificationCenter.default.post(name: .reorderByRank, object: nil)
-        updateUIAfterInteraction()
     }
     
     /// Updates VM to re-order Coin data by price ascending or descending
     @objc private func reorderDataByPrice() {
         NotificationCenter.default.post(name: .reorderByPrice, object: nil)
-        updateUIAfterInteraction()
     }
     
     ///Dismiss keyboard when the tap is recognized
-    @objc func dismissKeyboard() {
+    @objc private func dismissKeyboard() {
         ///Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
     }
@@ -244,7 +244,7 @@ extension HomeViewController {
     @objc func portfolioBtnPressed() {
         guard let portfolioVM = viewModel.initPortfolioVM() else { return }
         let targetVC = PortfolioViewController(portfolioVM)
-        
+        targetVC.portfolioVM?.shareDataDelegate = self.viewModel
         navigationController?.view.layer.add(CAAnimation.customTransition, forKey: nil)
         navigationController?.pushViewController(targetVC, animated: true)
     }

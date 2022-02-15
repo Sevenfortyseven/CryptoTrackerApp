@@ -17,11 +17,12 @@ struct CryptoCellViewModel {
     let currentPrice: Double
     let priceChangePercentage24H: String
     let marketCapRank: String
-
+    var holdingsCount: Int?
+    var holdingsValue: Double?
 
     
     
-    init(name: String, symbol: String, iconURL: String, currentPrice: Double, priceChangePercentage24H: Double, marketCapRank: Int) {
+    init(name: String, symbol: String, iconURL: String, currentPrice: Double, priceChangePercentage24H: Double, marketCapRank: Int, holdingsCount: Int?, holdingsValue: Double?) {
         self.name                     = name
         self.symbol                   = symbol.uppercased()
         self.iconURL                  = iconURL
@@ -29,6 +30,8 @@ struct CryptoCellViewModel {
         self.priceChangePercentage24H = priceChangePercentage24H.transformToPercentString()
         self.marketCapRank            = String(marketCapRank)
         self.currentPrice             = currentPrice
+        self.holdingsCount            = holdingsCount
+        self.holdingsValue            = holdingsValue
     }
     
 

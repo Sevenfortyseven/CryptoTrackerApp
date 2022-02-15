@@ -35,11 +35,11 @@ class MarketInfoModule: UIView {
     // Check for negative or positive value and rotate image/ change it's color accordingly
     public func checkForNegativeOrPositiveValues() {
         DispatchQueue.main.async {
-            if self.marketCapValueUpdate.text?.getFirstChar() == "-" {
-                self.marketCapValueImage.tintColor = .negativeRed
-                self.marketCapValueImage.rotateBy180(true)
+            if self.marketInfoItem1ValueUpdate.text?.getFirstChar() == "-" {
+                self.marketInfoItem1ValueUpdateImage.tintColor = .negativeRed
+                self.marketInfoItem1ValueUpdateImage.rotateBy180(true)
             } else {
-                self.marketCapValueImage.tintColor = .positiveGreen
+                self.marketInfoItem1ValueUpdateImage.tintColor = .positiveGreen
             }
         }
         
@@ -55,7 +55,7 @@ class MarketInfoModule: UIView {
     public func changeLayout(_ currentView: CurrentView) {
         switch currentView {
         case .userPortfolio:
-            btcDominanceLabel.text = "Portfolio Value"
+            marketInfoItem3Label.text = "Portfolio Value"
             
         }
     }
@@ -63,18 +63,18 @@ class MarketInfoModule: UIView {
     
     private func addSubviews() {
         self.addSubview(marketInfoStackView)
-        marketInfoStackView.addArrangedSubview(marketCapStackView)
-        marketInfoStackView.addArrangedSubview(volume24HStackView)
-        marketInfoStackView.addArrangedSubview(btcDominanceStackView)
-        marketCapStackView.addArrangedSubview(marketCapLabel)
-        marketCapStackView.addArrangedSubview(marketCapValue)
-        marketCapStackView.addArrangedSubview(marketCapValueUpdateStackView)
-        marketCapValueUpdateStackView.addArrangedSubview(marketCapValueImage)
-        marketCapValueUpdateStackView.addArrangedSubview(marketCapValueUpdate)
-        volume24HStackView.addArrangedSubview(volume24HLabel)
-        volume24HStackView.addArrangedSubview(volume24HLabelValue)
-        btcDominanceStackView.addArrangedSubview(btcDominanceLabel)
-        btcDominanceStackView.addArrangedSubview(btcDominanceValue)
+        marketInfoStackView.addArrangedSubview(marketInfoChildStack1)
+        marketInfoStackView.addArrangedSubview(marketInfoChildStack2)
+        marketInfoStackView.addArrangedSubview(marketInfoChildStack3)
+        marketInfoChildStack1.addArrangedSubview(marketInfoItem1Label)
+        marketInfoChildStack1.addArrangedSubview(marketInfoItem1Value)
+        marketInfoChildStack1.addArrangedSubview(marketInfoItem1ValueUpdateStack)
+        marketInfoItem1ValueUpdateStack.addArrangedSubview(marketInfoItem1ValueUpdateImage)
+        marketInfoItem1ValueUpdateStack.addArrangedSubview(marketInfoItem1ValueUpdate)
+        marketInfoChildStack2.addArrangedSubview(marketInfoItem2label)
+        marketInfoChildStack2.addArrangedSubview(marketInfoItem2Value)
+        marketInfoChildStack3.addArrangedSubview(marketInfoItem3Label)
+        marketInfoChildStack3.addArrangedSubview(marketInfoItem3Value)
     }
     
     //MARK: - UI Elements
@@ -89,7 +89,7 @@ class MarketInfoModule: UIView {
         return stackView
     }()
     
-    public let marketCapLabel: UILabel = {
+    public let marketInfoItem1Label: UILabel = {
         let label = UILabel()
         label.text = "Market Cap"
         label.textColor = .borderColor
@@ -97,21 +97,21 @@ class MarketInfoModule: UIView {
         return label
     }()
     
-    public let marketCapValue: UILabel = {
+    public let marketInfoItem1Value: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.font = .preferredFont(forTextStyle: .headline)
         return label
     }()
     
-    public let marketCapValueImage: UIImageView = {
+    public let marketInfoItem1ValueUpdateImage: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "triangle_Fill")
         imageView.contentMode = .scaleToFill
         return imageView
     }()
     
-    private let marketCapValueUpdateStackView: UIStackView = {
+    private let marketInfoItem1ValueUpdateStack: UIStackView = {
         let stackView = UIStackView()
         stackView.distribution = .fill
         stackView.alignment = .fill
@@ -119,7 +119,7 @@ class MarketInfoModule: UIView {
         return stackView
     }()
     
-    public let marketCapValueUpdate: UILabel = {
+    public let marketInfoItem1ValueUpdate: UILabel = {
         let label = UILabel()
         label.text = "12"
         label.textColor = .white
@@ -127,7 +127,7 @@ class MarketInfoModule: UIView {
         return label
     }()
     
-    private let marketCapStackView: UIStackView = {
+    private let marketInfoChildStack1: UIStackView = {
         let stackView = UIStackView()
         stackView.distribution = .fill
         stackView.spacing = 5
@@ -136,7 +136,7 @@ class MarketInfoModule: UIView {
         return stackView
     }()
     
-    private let volume24HLabel: UILabel = {
+    private let marketInfoItem2label: UILabel = {
         let label = UILabel()
         label.text = "24h Volume"
         label.textColor = .borderColor
@@ -144,14 +144,14 @@ class MarketInfoModule: UIView {
         return label
     }()
     
-    public let volume24HLabelValue: UILabel = {
+    public let marketInfoItem2Value: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.font = .preferredFont(forTextStyle: .headline)
         return label
     }()
     
-    private let volume24HStackView: UIStackView = {
+    private let marketInfoChildStack2: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 5
@@ -160,7 +160,7 @@ class MarketInfoModule: UIView {
         return stackView
     }()
     
-    public let btcDominanceLabel: UILabel = {
+    public let marketInfoItem3Label: UILabel = {
         let label = UILabel()
         label.text = "BTC Dominance"
         label.textColor = .borderColor
@@ -168,14 +168,14 @@ class MarketInfoModule: UIView {
         return label
     }()
     
-    public let btcDominanceValue: UILabel = {
+    public let marketInfoItem3Value: UILabel = {
         let label = UILabel()
         label.textColor = .white
         label.font = .preferredFont(forTextStyle: .headline)
         return label
     }()
     
-    private let btcDominanceStackView: UIStackView = {
+    private let marketInfoChildStack3: UIStackView = {
         let stackView = UIStackView()
         stackView.distribution = .fill
         stackView.alignment = .center
@@ -196,8 +196,8 @@ class MarketInfoModule: UIView {
         constraints.append(marketInfoStackView.topAnchor.constraint(equalTo: self.topAnchor))
         constraints.append(marketInfoStackView.bottomAnchor.constraint(equalTo: self.bottomAnchor))
         constraints.append(marketInfoStackView.centerXAnchor.constraint(equalTo: self.centerXAnchor))
-        constraints.append(marketCapValueImage.widthAnchor.constraint(equalToConstant: marketCapIconSize))
-        constraints.append(marketCapValueImage.heightAnchor.constraint(equalToConstant: marketCapIconSize))
+        constraints.append(marketInfoItem1ValueUpdateImage.widthAnchor.constraint(equalToConstant: marketCapIconSize))
+        constraints.append(marketInfoItem1ValueUpdateImage.heightAnchor.constraint(equalToConstant: marketCapIconSize))
         
         NSLayoutConstraint.activate(constraints)
     }

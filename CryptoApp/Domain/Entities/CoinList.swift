@@ -38,6 +38,7 @@ struct CoinList {
     let priceChangePercentage24H: Double?
     let marketCapRank: Int
     let id: String
-
+    var isOwned: Bool
+    var holdings: Int
 }
 

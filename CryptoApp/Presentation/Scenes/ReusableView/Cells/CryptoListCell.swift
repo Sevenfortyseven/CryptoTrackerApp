@@ -28,6 +28,13 @@ class CryptoListTableViewCell: UITableViewCell {
             } else {
                 priceChangePercenrageLabel.textColor = .positiveGreen
             }
+            
+            guard let holdingsCounter = cellViewModel.holdingsCount else { return
+                
+            }
+            
+            holdingsValue.text = cellViewModel.holdingsValue?.transformToCurrencyWith6Decimals()
+            holdingsCount.text = String(holdingsCounter)
         }
     }
     
@@ -50,6 +57,7 @@ class CryptoListTableViewCell: UITableViewCell {
     private func addSubviews() {
         self.contentView.addSubview(leftSideStackView)
         self.contentView.addSubview(rightSideStackView)
+        self.contentView.addSubview(holdingsInfoStack)
     }
     
     private func populateStackView() {
@@ -58,12 +66,15 @@ class CryptoListTableViewCell: UITableViewCell {
         leftSideStackView.addArrangedSubview(symbolLabel)
         rightSideStackView.addArrangedSubview(currentPriceLabel)
         rightSideStackView.addArrangedSubview(priceChangePercenrageLabel)
+        holdingsInfoStack.addArrangedSubview(holdingsValue)
+        holdingsInfoStack.addArrangedSubview(holdingsCount)
     }
     
     // MARK: - UI Configuration
     private func updateUI() {
         self.clipsToBounds = true
         self.backgroundColor = .clear
+        self.holdingsInfoStack.isHidden = true
 
     }
     
@@ -74,12 +85,39 @@ class CryptoListTableViewCell: UITableViewCell {
         let stackView = UIStackView()
         stackView.alignment = .center
         stackView.axis = .horizontal
-        stackView.clipsToBounds = false
+        stackView.clipsToBounds = true
         stackView.distribution = .fill
-        stackView.spacing = 7
+        stackView.spacing = 1
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
+    
+    public let holdingsInfoStack: UIStackView = {
+        let stackView = UIStackView()
+        stackView.alignment = .center
+        stackView.axis = .vertical
+        stackView.distribution = .fill
+        stackView.spacing = 1
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private let holdingsValue: UILabel = {
+        let label = UILabel()
+        label.textColor = .letterColor
+        label.font = .preferredFont(forTextStyle: .footnote, compatibleWith: .init(legibilityWeight: .bold))
+        label.textAlignment = .right
+        return label
+    }()
+    
+    private let holdingsCount: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .preferredFont(forTextStyle: .headline)
+        label.textAlignment = .right
+        return label
+    }()
+    
     
     private let rightSideStackView: UIStackView = {
         let stackView = UIStackView()
@@ -117,6 +155,7 @@ class CryptoListTableViewCell: UITableViewCell {
     private let currentPriceLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .right
+        label.font = .preferredFont(forTextStyle: .footnote, compatibleWith: .init(legibilityWeight: .bold))
         label.textColor = .letterColor
         return label
     }()
@@ -124,6 +163,7 @@ class CryptoListTableViewCell: UITableViewCell {
     private let priceChangePercenrageLabel: UILabel = {
         let label = UILabel()
         label.textColor = .positiveGreen
+        label.font = .preferredFont(forTextStyle: .headline)
         label.textAlignment = .right
         return label
     }()
@@ -150,6 +190,13 @@ extension CryptoListTableViewCell {
         constraints.append(leftSideStackView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: topPadding))
         constraints.append(leftSideStackView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor))
         constraints.append(leftSideStackView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: stackViewWidthMultiplier))
+        constraints.append(leftSideStackView.centerYAnchor.constraint(equalTo: holdingsInfoStack.centerYAnchor))
+        
+        /// Middle StackView
+        constraints.append(holdingsInfoStack.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: topPadding))
+        constraints.append(holdingsInfoStack.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor))
+        constraints.append(holdingsInfoStack.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor))
+        
         
         /// Right side StackView
         constraints.append(rightSideStackView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: rightPadding))
