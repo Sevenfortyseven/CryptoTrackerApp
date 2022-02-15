@@ -345,7 +345,6 @@ extension MarketplaceViewController {
       let searchBarWidthMultiplier       = CGFloat(0.9)
       let collectionViewHeightMultiplier = CGFloat(0.15)
       let stackHeightMultiplier          = CGFloat(0.15)
-      let stackWidthMultiplier           = CGFloat(0.10)
       let checkMarkImageSize             = CGFloat(30)
       var constraints                    = [NSLayoutConstraint]()
       
