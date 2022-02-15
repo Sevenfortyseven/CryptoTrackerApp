@@ -41,8 +41,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<img src="Screenshots/image1.png" width="200" height="400">          <img src="Screenshots/image2.png" width="200" height="400">          <img src="Screenshots/image3.png" width="200" height="400">  
-<img src="Screenshots/image4.png" width="200" height="400">         <img src="Screenshots/image5.png" width="200" height="400">          <img src="Screenshots/image6.png" width="200" height="400">  
+<img src="Screenshots/image1.png" width="200" height="400">    </br>    <img src="Screenshots/image2.png" width="200" height="400">    </br>    <img src="Screenshots/image3.png" width="200" height="400">  
+<img src="Screenshots/image4.png" width="200" height="400">    </br>    <img src="Screenshots/image5.png" width="200" height="400">    </br>    <img src="Screenshots/image6.png" width="200" height="400">  
 
 
 
@@ -81,7 +81,7 @@ Libraries I've used:
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/Sevenfortyseven/Movies-App.git
+   git clone https://github.com/Sevenfortyseven/CryptoTrackerApp
    ```
 
 
